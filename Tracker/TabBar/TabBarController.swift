@@ -42,5 +42,8 @@ final class TabBarController: UITabBarController {
         tabBar.standardAppearance = appearance
 
         tabBar.tintColor = .designBlue
+        
+        tabBar.layer.borderWidth = 1.0
+        tabBar.layer.borderColor = UIColor.lightGray.cgColor
     }
 }

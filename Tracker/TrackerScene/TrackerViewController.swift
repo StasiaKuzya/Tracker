@@ -95,6 +95,9 @@ final class TrackerViewController: UIViewController {
         }
     }
     
+    private var categories: [TrackerCategory] = []
+    private var completedTrackers: [TrackerRecord] = []
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -176,8 +179,4 @@ final class TrackerViewController: UIViewController {
     
     @objc func addTrackerButtonTapped() {
     }
-}
-
-// TODO
-struct Tracker {
 }
