@@ -34,11 +34,6 @@ final class SplashViewController: UIViewController {
     
     private func switchToTabBarController() {
         guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }
-        
-        let trackerViewController = TrackerViewController()
-        let trackerNavigationController = UINavigationController(rootViewController: trackerViewController)
-        let statisticsViewController = StatisticsViewController()
-        
         let tabBarController = TabBarController()
         window.rootViewController = tabBarController
     }

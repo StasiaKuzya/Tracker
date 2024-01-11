@@ -19,25 +19,6 @@ final class TrackerViewController: UIViewController {
         return formatter
     }()
     
-    private let addTrackerButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle(nil, for: .normal)
-        button.tintColor = .designBlack
-        button.addTarget(self, action: #selector(addTrackerButtonTapped), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    private let trackerMainLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Трекеры"
-        label.textAlignment = .center
-        label.textColor = .designBlack
-        label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
     private let dateView: UIView = {
         let view = UIView()
         view.backgroundColor = .designLightGray
@@ -55,19 +36,15 @@ final class TrackerViewController: UIViewController {
         return label
     }()
     
-    private let searchTextField: UISearchTextField = {
-        let searchField = UISearchTextField()
-        searchField.placeholder = "Поиск"
-        searchField.backgroundColor = .designLightGray2
-        searchField.translatesAutoresizingMaskIntoConstraints = false
-        return searchField
-    }()
+    private let searchController = UISearchController(searchResultsController: nil)
     
-    private let emptyTrackerStateView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .designWhite
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    private lazy var emptyTrackerStateStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.spacing = 8
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
     }()
     
     private let emptyTrackerStateImage: UIImageView = {
@@ -88,7 +65,7 @@ final class TrackerViewController: UIViewController {
         return label
     }()
     
-    // TODO
+    // TODO:
     private var trackers: [Tracker] = [] {
         didSet {
             updateUIForTrackers()
@@ -97,86 +74,99 @@ final class TrackerViewController: UIViewController {
     
     private var categories: [TrackerCategory] = []
     private var completedTrackers: [TrackerRecord] = []
+
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .designWhite
         
-        addTrackerButton.setImage(buttonImage, for: .normal)
         dateLabel.text = dateFormatter.string(from: Date())
-        
+
+        addTBViews()
+        addNCViews()
         addSubViews()
         constraintsActivation()
     }
     
     // MARK: -  Private Methods
     
+    private func addTBViews() {
+        if let tabBarController = tabBarController {
+            additionalSafeAreaInsets.bottom = tabBarController.tabBar.frame.size.height
+        }
+    }
+    
+    private func addNCViews() {
+        if let navigationController = navigationController {
+            let addButton = UIBarButtonItem(barButtonSystemItem: .add,
+                                            target: self,
+                                            action: #selector(addTrackerButtonTapped))
+            addButton.tintColor = .designBlack
+
+            dateView.addSubview(dateLabel)
+            dateLabel.textAlignment = .center
+            let dateBarButtonItem = UIBarButtonItem(customView: dateView)
+            
+            navigationItem.leftBarButtonItem = addButton
+            navigationItem.rightBarButtonItem = dateBarButtonItem
+            
+            navigationController.navigationBar.prefersLargeTitles = true
+            navigationItem.largeTitleDisplayMode = .always
+            title = "Трекеры"
+               navigationController.navigationBar.largeTitleTextAttributes = [
+                   .foregroundColor: UIColor.designBlack,
+                   .font: UIFont.systemFont(ofSize: 34, weight: .bold)
+               ]
+            
+            searchController.searchResultsUpdater = self
+            searchController.obscuresBackgroundDuringPresentation = false
+            searchController.searchBar.placeholder = "Поиск"
+        
+            navigationItem.searchController = searchController
+            navigationItem.hidesSearchBarWhenScrolling = false
+        }
+    }
+    
     private func addSubViews() {
-        view.addSubview(addTrackerButton)
-        view.addSubview(trackerMainLabel)
         view.addSubview(dateView)
-        view.addSubview(dateLabel)
-        view.addSubview(searchTextField)
-        view.addSubview(emptyTrackerStateView)
-        view.addSubview(emptyTrackerStateImage)
-        view.addSubview(emptyTrackerStateLabel)
+        
+        emptyTrackerStateStackView.addArrangedSubview(emptyTrackerStateImage)
+        emptyTrackerStateStackView.addArrangedSubview(emptyTrackerStateLabel)
+        view.addSubview(emptyTrackerStateStackView)
     }
     
     private func constraintsActivation() {
         NSLayoutConstraint.activate([
-            addTrackerButton.heightAnchor.constraint(equalToConstant: 42),
-            addTrackerButton.widthAnchor.constraint(equalToConstant: 42),
-            addTrackerButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 6),
-            addTrackerButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
-            
-            trackerMainLabel.topAnchor.constraint(equalTo: addTrackerButton.bottomAnchor, constant: 1),
-            trackerMainLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            trackerMainLabel.leadingAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 16),
-            
+
             dateView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             dateView.leadingAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             dateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 5),
             dateView.heightAnchor.constraint(equalToConstant: 34),
             dateView.widthAnchor.constraint(equalToConstant: 77),
-            
 
             dateLabel.centerXAnchor.constraint(equalTo: dateView.centerXAnchor),
             dateLabel.centerYAnchor.constraint(equalTo: dateView.centerYAnchor),
             
-            searchTextField.topAnchor.constraint(equalTo: trackerMainLabel.bottomAnchor, constant: 7),
-            searchTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            searchTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            
-            emptyTrackerStateView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 0),
-            emptyTrackerStateView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 0),
-            emptyTrackerStateView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 10),
-            emptyTrackerStateView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0),
-            
-            
-            emptyTrackerStateImage.heightAnchor.constraint(equalToConstant: 80),
-            emptyTrackerStateImage.widthAnchor.constraint(equalToConstant: 80),
-            emptyTrackerStateImage.centerXAnchor.constraint(equalTo: emptyTrackerStateView.centerXAnchor),
-            emptyTrackerStateImage.topAnchor.constraint(greaterThanOrEqualTo: emptyTrackerStateView.topAnchor, constant: 220),
-            
-            
-            emptyTrackerStateLabel.leadingAnchor.constraint(equalTo: emptyTrackerStateView.leadingAnchor, constant: 16),
-            emptyTrackerStateLabel.trailingAnchor.constraint(equalTo: emptyTrackerStateView.trailingAnchor, constant: -16),
-            emptyTrackerStateLabel.topAnchor.constraint(equalTo: emptyTrackerStateImage.bottomAnchor, constant: 8),
-            emptyTrackerStateLabel.bottomAnchor.constraint(greaterThanOrEqualTo: emptyTrackerStateView.bottomAnchor, constant: -275),
-
-            
+            emptyTrackerStateStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            emptyTrackerStateStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
         ])
     }
     
     private func updateUIForTrackers() {
-        emptyTrackerStateView.isHidden = !trackers.isEmpty
         emptyTrackerStateLabel.isHidden = !trackers.isEmpty
         emptyTrackerStateImage.isHidden = !trackers.isEmpty
     }
     
-    // MARK: -  Methods
+    // MARK: - Methods
     
     @objc func addTrackerButtonTapped() {
+    }
+}
+
+    // MARK: - UISearchResultsUpdating
+
+extension TrackerViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
     }
 }
