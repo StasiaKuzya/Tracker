@@ -12,31 +12,25 @@ final class TrackerViewController: UIViewController {
     
     // MARK: -  Properties & Constants
     
-    private let buttonImage = UIImage(named: "addTracker")
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "DD.MM.YY"
         return formatter
     }()
     
-    private let dateView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .designLightGray
-        view.layer.cornerRadius = 8
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    private let dateLabel: UILabel = {
-        let label = UILabel()
-        label.textAlignment = .center
-        label.textColor = .designBlack
-        label.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
     private let searchController = UISearchController(searchResultsController: nil)
+//    private let datePicker = UIDatePicker()
+    private var datePicker: UIDatePicker = {
+        let picker = UIDatePicker()
+        picker.datePickerMode = .date
+        picker.addTarget(self,
+                         action: #selector(datePickerValueChanged(_:)),
+                         for: .valueChanged)
+        if #available(iOS 14.0, *) {
+            picker.preferredDatePickerStyle = .compact
+        }
+        return picker
+    }()
     
     private lazy var emptyTrackerStateStackView: UIStackView = {
         let stackView = UIStackView()
@@ -81,12 +75,9 @@ final class TrackerViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .designWhite
         
-        dateLabel.text = dateFormatter.string(from: Date())
-
         addTBViews()
         addNCViews()
-        addSubViews()
-        constraintsActivation()
+        setupViews()
     }
     
     // MARK: -  Private Methods
@@ -103,16 +94,12 @@ final class TrackerViewController: UIViewController {
                                             target: self,
                                             action: #selector(addTrackerButtonTapped))
             addButton.tintColor = .designBlack
-
-            dateView.addSubview(dateLabel)
-            dateLabel.textAlignment = .center
-            let dateBarButtonItem = UIBarButtonItem(customView: dateView)
-            
             navigationItem.leftBarButtonItem = addButton
-            navigationItem.rightBarButtonItem = dateBarButtonItem
+            
+            navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
             
             navigationController.navigationBar.prefersLargeTitles = true
-            navigationItem.largeTitleDisplayMode = .always
+//            navigationItem.largeTitleDisplayMode = .automatic
             title = "Трекеры"
                navigationController.navigationBar.largeTitleTextAttributes = [
                    .foregroundColor: UIColor.designBlack,
@@ -128,26 +115,11 @@ final class TrackerViewController: UIViewController {
         }
     }
     
-    private func addSubViews() {
-        view.addSubview(dateView)
-        
+    private func setupViews() {
         emptyTrackerStateStackView.addArrangedSubview(emptyTrackerStateImage)
         emptyTrackerStateStackView.addArrangedSubview(emptyTrackerStateLabel)
         view.addSubview(emptyTrackerStateStackView)
-    }
-    
-    private func constraintsActivation() {
         NSLayoutConstraint.activate([
-
-            dateView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            dateView.leadingAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            dateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 5),
-            dateView.heightAnchor.constraint(equalToConstant: 34),
-            dateView.widthAnchor.constraint(equalToConstant: 77),
-
-            dateLabel.centerXAnchor.constraint(equalTo: dateView.centerXAnchor),
-            dateLabel.centerYAnchor.constraint(equalTo: dateView.centerYAnchor),
-            
             emptyTrackerStateStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             emptyTrackerStateStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
         ])
@@ -158,9 +130,20 @@ final class TrackerViewController: UIViewController {
         emptyTrackerStateImage.isHidden = !trackers.isEmpty
     }
     
-    // MARK: - Methods
+    @objc private func addTrackerButtonTapped() {
+        showTrackerTypeSelectionScreen()
+    }
     
-    @objc func addTrackerButtonTapped() {
+    @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
+        let selectedDate = sender.date
+        let formattedDate = dateFormatter.string(from: selectedDate)
+        print("Выбранная дата: \(formattedDate)")
+    }
+    
+    private func showTrackerTypeSelectionScreen() {
+        let trackerTypeSelectionVС = TrackerTypeSelectionViewController()
+        let navigationController = UINavigationController(rootViewController: trackerTypeSelectionVС)
+        present(navigationController, animated: true, completion: nil)
     }
 }
 

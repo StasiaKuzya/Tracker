@@ -14,5 +14,6 @@ extension UIColor {
     static var designBlue: UIColor { UIColor(named: "Blue") ?? UIColor.blue }
     static var designGray: UIColor { UIColor(named: "Gray") ?? UIColor.gray }
     static var designLightGray: UIColor { UIColor(named: "Light Gray") ?? UIColor.gray }
-    static var designLightGray2: UIColor { UIColor(named: "LightGraySearchTextField") ?? UIColor.gray }
+    static var designBackground: UIColor { UIColor(named: "Background [day]") ?? UIColor.lightGray }
+    static var designRed: UIColor { UIColor(named: "Red") ?? UIColor.red}
 }
