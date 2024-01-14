@@ -8,14 +8,22 @@
 import Foundation
 import UIKit
 
+protocol CategorySelectionDelegate: AnyObject {
+    func didSelectCategory(_ category: String)
+}
+
 final class CategoryManagementViewController: UIViewController {
     
     // MARK: -  Properties & Constants
     
+    weak var categorySelectionDelegate: CategorySelectionDelegate?
     private var categories: [TrackerCategory] = []
 
     private let tableView: UITableView = {
         let tableView = UITableView()
+        tableView.layer.cornerRadius = 16
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        tableView.allowsMultipleSelection = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(CategoryTableViewCell.self, forCellReuseIdentifier: "categoryCell")
         return tableView
@@ -86,10 +94,10 @@ final class CategoryManagementViewController: UIViewController {
         view.addSubview(addButton)
 
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            tableView.bottomAnchor.constraint(greaterThanOrEqualTo: addButton.topAnchor, constant: 24),
 
             emptyTrackerStateStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             emptyTrackerStateStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -(60 + 16) / 2),
@@ -109,11 +117,9 @@ final class CategoryManagementViewController: UIViewController {
         // Загрузка категорий из хранилища
 
         if categories.isEmpty {
-            // Если категорий нет, показываем заглушку и кнопку "Добавить категорию"
             emptyTrackerStateImage.isHidden = false
             addButton.isHidden = false
         } else {
-            // Если есть категории, показываем таблицу
             tableView.isHidden = false
             tableView.reloadData()
         }
@@ -135,26 +141,36 @@ extension CategoryManagementViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)  as? CategoryTableViewCell else {
+            fatalError("Unable to dequeue CategoryTableViewCell")
+        }
+        
         cell.textLabel?.text = categories[indexPath.row].title
+        cell.accessoryType = .none
         return cell
     }
 }
     // MARK: - UITableViewDelegate
 
 extension CategoryManagementViewController: UITableViewDelegate {
-
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        // Обработка выбора категории
+        if let cell = tableView.cellForRow(at: indexPath) {
+            cell.accessoryType = .checkmark
+        }
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 75.0
     }
 }
     // MARK: - NewCategoryDelegate
 
 extension CategoryManagementViewController: NewCategoryDelegate {
     func didAddCategory(_ category: TrackerCategory) {
-        // Обработка добавления новой категории
         categories.append(category)
         loadCategories()
+        emptyTrackerStateStackView.isHidden = true
     }
 }

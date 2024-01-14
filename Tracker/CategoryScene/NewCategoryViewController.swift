@@ -43,6 +43,8 @@ final class NewCategoryViewController: UIViewController {
         saveButton.setTitle("Готово", for: .normal)
         
         saveButton.titleLabel?.tintColor = .designWhite
+        saveButton.setTitleColor(.designWhite, for: .normal)
+        saveButton.setTitleColor(.designWhite, for: .disabled)
         saveButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         saveButton.backgroundColor = .designGray
         saveButton.layer.cornerRadius = 16
@@ -96,17 +98,10 @@ final class NewCategoryViewController: UIViewController {
     
     @objc private func saveButtonTapped() {
         guard let categoryName = textField.text, !categoryName.isEmpty else {
-            // Обработка случая, когда введено пустое название
             return
         }
-
-        // Создание новой категории
         let newCategory = TrackerCategory(title: categoryName, trackers: [])
-
-        // Уведомление делегата о добавлении новой категории
         delegate?.didAddCategory(newCategory)
-
-        // Закрытие экрана создания новой категории
         dismiss(animated: true, completion: nil)
     }
 }

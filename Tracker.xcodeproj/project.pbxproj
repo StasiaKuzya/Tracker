@@ -26,6 +26,8 @@
 		5AFE63C02B52E7B60076EC5E /* CategoryManagementViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AFE63BF2B52E7B60076EC5E /* CategoryManagementViewController.swift */; };
 		5AFE63C22B52E7F90076EC5E /* NewCategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AFE63C12B52E7F90076EC5E /* NewCategoryViewController.swift */; };
 		5AFE63C42B52E8840076EC5E /* CategoryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AFE63C32B52E8840076EC5E /* CategoryTableViewCell.swift */; };
+		5AFE63C92B53FC540076EC5E /* ScheduleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AFE63C82B53FC540076EC5E /* ScheduleViewController.swift */; };
+		5AFE63CB2B53FD100076EC5E /* ScheduleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AFE63CA2B53FD100076EC5E /* ScheduleTableViewCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +52,8 @@
 		5AFE63BF2B52E7B60076EC5E /* CategoryManagementViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryManagementViewController.swift; sourceTree = "<group>"; };
 		5AFE63C12B52E7F90076EC5E /* NewCategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCategoryViewController.swift; sourceTree = "<group>"; };
 		5AFE63C32B52E8840076EC5E /* CategoryTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTableViewCell.swift; sourceTree = "<group>"; };
+		5AFE63C82B53FC540076EC5E /* ScheduleViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleViewController.swift; sourceTree = "<group>"; };
+		5AFE63CA2B53FD100076EC5E /* ScheduleTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleTableViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +91,7 @@
 				5A6DA0E52B470448008A2111 /* TrackerScene */,
 				5AFE63C62B530ED60076EC5E /* HabitScene */,
 				5AFE63C52B530E7E0076EC5E /* CategoryScene */,
+				5AFE63C72B53FBFB0076EC5E /* ScheduleScene */,
 				5A6DA0E62B470472008A2111 /* StatisticsScene */,
 				5A6DA0E92B470F18008A2111 /* Helpers */,
 				5A6DA0CE2B46F800008A2111 /* AppDelegate.swift */,
@@ -162,6 +167,15 @@
 			path = HabitScene;
 			sourceTree = "<group>";
 		};
+		5AFE63C72B53FBFB0076EC5E /* ScheduleScene */ = {
+			isa = PBXGroup;
+			children = (
+				5AFE63C82B53FC540076EC5E /* ScheduleViewController.swift */,
+				5AFE63CA2B53FD100076EC5E /* ScheduleTableViewCell.swift */,
+			);
+			path = ScheduleScene;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -234,7 +248,9 @@
 			files = (
 				5AFE63B42B4BF0F80076EC5E /* TrackerCategory.swift in Sources */,
 				5AFE63C22B52E7F90076EC5E /* NewCategoryViewController.swift in Sources */,
+				5AFE63CB2B53FD100076EC5E /* ScheduleTableViewCell.swift in Sources */,
 				5A6DA0D32B46F800008A2111 /* TrackerViewController.swift in Sources */,
+				5AFE63C92B53FC540076EC5E /* ScheduleViewController.swift in Sources */,
 				5AFE63C02B52E7B60076EC5E /* CategoryManagementViewController.swift in Sources */,
 				5A6DA0EB2B470F57008A2111 /* UIColor+Extensions.swift in Sources */,
 				5A6DA0E82B4704AD008A2111 /* StatisticsViewController.swift in Sources */,

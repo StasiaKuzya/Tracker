@@ -12,9 +12,12 @@ final class NewHabitCreationViewController: UIViewController {
 
     // MARK: -  Properties & Constants
     
-    private let words = ["Kатегория", "Paсписание"]
+    private var words: [(title: String, subtitle: String?)] = [("Категория", nil), ("Расписание", nil)]
+
     private let maxLength = 38
     
+    private var selectedCategory: String?
+
     private lazy var stackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [textField, tableView])
         stackView.axis = .vertical
@@ -43,7 +46,7 @@ final class NewHabitCreationViewController: UIViewController {
     
     private var tableView: UITableView = {
         let tableView = UITableView()
-        tableView.backgroundColor = .designBackground
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         tableView.layer.cornerRadius = 16
         tableView.layer.masksToBounds = true
         return tableView
@@ -118,6 +121,9 @@ final class NewHabitCreationViewController: UIViewController {
         tableView.separatorStyle = .singleLine
         setupViews()
         tableView.reloadData()
+        
+        didSelectCategory(selectedCategory ?? "")
+        didSelectDays([])
     }
     
     // MARK: - Private Methods
@@ -146,13 +152,15 @@ final class NewHabitCreationViewController: UIViewController {
     
     private func showCategoryScreen() {
         let categoryManagementVC = CategoryManagementViewController()
+        categoryManagementVC.categorySelectionDelegate = self
         let categoryManagementNC = UINavigationController(rootViewController: categoryManagementVC)
         present(categoryManagementNC, animated: true, completion: nil)
     }
     private func showScheduleScreen() {
-//        let categoryManagementVC = CategoryManagementViewController()
-//        let navigationController = UINavigationController(rootViewController: categoryManagementVC)
-//        present(navigationController, animated: true, completion: nil)
+        let scheduleVC = ScheduleViewController()
+        scheduleVC.scheduleDelegate = self
+        let scheduleNC = UINavigationController(rootViewController: scheduleVC)
+        present(scheduleNC, animated: true, completion: nil)
     }
 
     @objc private func cancelButtonTapped() {
@@ -181,7 +189,27 @@ extension NewHabitCreationViewController: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? HabitTableViewCell else {
             fatalError("Unable to dequeue HabitCollectionViewCell")
         }
-        cell.textLabel?.text = words[indexPath.section]
+        let cellInfo = words[indexPath.section]
+        
+        cell.textLabel?.text = cellInfo.title
+        cell.textLabel?.numberOfLines = 1
+
+        if let subtitle = cellInfo.subtitle, !subtitle.isEmpty {
+            let attributedText = NSMutableAttributedString(string: cellInfo.title, attributes: [
+                .foregroundColor: UIColor.designBlack,
+                .font: UIFont.systemFont(ofSize: 16, weight: .regular)
+            ])
+
+            attributedText.append(NSAttributedString(string: "\n\(subtitle)", attributes: [
+                .foregroundColor: UIColor.designGray,
+                .font: UIFont.systemFont(ofSize: 16, weight: .regular)
+            ]))
+
+            cell.textLabel?.attributedText = attributedText
+            
+            cell.textLabel?.numberOfLines = 0
+        }
+        
         return cell
     }
 }
@@ -212,5 +240,25 @@ extension NewHabitCreationViewController: UITableViewDelegate {
 extension NewHabitCreationViewController: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         textField.textColor = .designBlack
+    }
+}
+
+    // MARK: - CategorySelectionDelegate
+
+extension NewHabitCreationViewController: CategorySelectionDelegate {
+    func didSelectCategory(_ category: String) {
+        selectedCategory = category
+        words[0].subtitle = selectedCategory
+        print("categ \(category)")
+        tableView.reloadData()
+    }
+}
+
+    // MARK: - ScheduleSelectionDelegate
+
+extension NewHabitCreationViewController: ScheduleSelectionDelegate {
+    func didSelectDays(_ days: [String]) {
+        words[1].subtitle = days.joined(separator: ", ")
+        tableView.reloadData()
     }
 }
