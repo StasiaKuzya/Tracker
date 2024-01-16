@@ -12,8 +12,9 @@ struct Tracker {
     let trackerId: Int
     let trackerName: String
     let trackerColor: UIColor
-    let trackerEmoji: String
+    let trackerEmoji: String?
     let trackerSchedule: TrackerSchedule
+    var trackerProgress: Int
 }
 
 struct TrackerSchedule {

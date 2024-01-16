@@ -48,6 +48,7 @@ final class NewHabitCreationViewController: UIViewController {
         let tableView = UITableView()
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         tableView.layer.cornerRadius = 16
+        tableView.separatorStyle = .singleLine
         tableView.layer.masksToBounds = true
         return tableView
     }()
@@ -112,13 +113,6 @@ final class NewHabitCreationViewController: UIViewController {
         
         title = "Новая привычка"
         
-        textField.delegate = self
-        
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.register(HabitTableViewCell.self, forCellReuseIdentifier: "cell")
-        
-        tableView.separatorStyle = .singleLine
         setupViews()
         tableView.reloadData()
         
@@ -131,6 +125,9 @@ final class NewHabitCreationViewController: UIViewController {
     private func setupViews() {
         view.addSubview(stackView)
         view.addSubview(stackViewH)
+        
+        tableView.layer.borderWidth = 1
+        tableView.layer.borderColor = view.backgroundColor?.cgColor
         
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -148,6 +145,11 @@ final class NewHabitCreationViewController: UIViewController {
             stackViewH.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             stackViewH.heightAnchor.constraint(equalToConstant: 60)
         ])
+        
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(HabitTableViewCell.self, forCellReuseIdentifier: "cell")
+        textField.delegate = self
     }
     
     private func showCategoryScreen() {

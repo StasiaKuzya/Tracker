@@ -14,6 +14,7 @@ final class TrackerViewController: UIViewController {
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
         formatter.dateFormat = "DD.MM.YY"
         return formatter
     }()
@@ -68,12 +69,48 @@ final class TrackerViewController: UIViewController {
     
     private var categories: [TrackerCategory] = []
     private var completedTrackers: [TrackerRecord] = []
+    
+    let params = GeometricParams(cellCount: 2,
+                                 leftInset: 16,
+                                 rightInset: 16,
+                                 cellSpacing: 7)
 
+    var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
+    }()
+    
+    init() {
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .designWhite
+        
+        let shockTracker = Tracker(
+              trackerId: 1,
+              trackerName: "Трекер 1",
+              trackerColor: .red,
+              trackerEmoji: "😱",
+              trackerSchedule: TrackerSchedule(
+                  trackerScheduleDaysOfWeek: Set(DayOfWeek.allCases),
+                  trackerScheduleStartTime: Date(),
+                  trackerScheduleEndTime: Date().addingTimeInterval(60 * 60 * 2)
+              ),
+              trackerProgress: 0
+          )
+          trackers.append(shockTracker)
+          trackers.append(shockTracker)
+          trackers.append(shockTracker)
         
         addTBViews()
         addNCViews()
@@ -99,7 +136,7 @@ final class TrackerViewController: UIViewController {
             navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
             
             navigationController.navigationBar.prefersLargeTitles = true
-//            navigationItem.largeTitleDisplayMode = .automatic
+            navigationItem.largeTitleDisplayMode = .always
             title = "Трекеры"
                navigationController.navigationBar.largeTitleTextAttributes = [
                    .foregroundColor: UIColor.designBlack,
@@ -118,11 +155,23 @@ final class TrackerViewController: UIViewController {
     private func setupViews() {
         emptyTrackerStateStackView.addArrangedSubview(emptyTrackerStateImage)
         emptyTrackerStateStackView.addArrangedSubview(emptyTrackerStateLabel)
+        view.addSubview(collectionView)
         view.addSubview(emptyTrackerStateStackView)
         NSLayoutConstraint.activate([
             emptyTrackerStateStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             emptyTrackerStateStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            datePicker.widthAnchor.constraint(equalToConstant: 77)
         ])
+        
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: "cellTrackerCV")
+        collectionView.register(SupplementaryTrackerView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "header")
+        collectionView.register(SupplementaryTrackerView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "footer")
     }
     
     private func updateUIForTrackers() {
@@ -151,5 +200,104 @@ final class TrackerViewController: UIViewController {
 
 extension TrackerViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
+    }
+}
+
+    // MARK: - UICollectionViewDataSource
+
+extension TrackerViewController: UICollectionViewDataSource {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return trackers.count
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        // Создать ячейку
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellTrackerCV", for: indexPath) as? TrackerCollectionViewCell else { return UICollectionViewCell() }
+        
+        // Настроить ячейку
+        cell.prepareForReuse()
+        if indexPath.item < trackers.count {
+             cell.configure(with: trackers[indexPath.item])
+         }
+        
+        // Возвратить ячейку
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        var id: String
+        switch kind {
+        case UICollectionView.elementKindSectionHeader:
+            id = "header"
+        case UICollectionView.elementKindSectionFooter:
+            id = "footer"
+        default:
+            id = ""
+        }
+        
+        let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as! SupplementaryTrackerView
+        return view
+    }
+}
+
+    // MARK: - UICollectionViewDelegateFlowLayout
+
+extension TrackerViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        
+        let indexPath = IndexPath(row: 0, section: section)
+        let headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: indexPath)
+        
+        return headerView.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width,
+                                                         height: UIView.layoutFittingExpandedSize.height),
+                                                         withHorizontalFittingPriority: .required,
+                                                         verticalFittingPriority: .fittingSizeLevel)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+                let availableWidth = collectionView.frame.width - params.paddingWidth
+                let cellWidth =  availableWidth / CGFloat(params.cellCount)
+        return CGSize(width: cellWidth, height: cellWidth * 0.87)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 12, left: params.leftInset, bottom: 0, right: params.rightInset)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        params.cellSpacing
+    }
+}
+
+    // MARK: - UICollectionViewDelegate
+
+extension TrackerViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+
+    }
+}
+
+struct GeometricParams {
+    let cellCount: Int
+    let leftInset: CGFloat
+    let rightInset: CGFloat
+    let cellSpacing: CGFloat
+    let paddingWidth: CGFloat
+    
+    init(cellCount: Int, leftInset: CGFloat, rightInset: CGFloat, cellSpacing: CGFloat) {
+        self.cellCount = cellCount
+        self.leftInset = leftInset
+        self.rightInset = rightInset
+        self.cellSpacing = cellSpacing
+        self.paddingWidth = leftInset + rightInset + CGFloat(cellCount - 1) * cellSpacing
     }
 }

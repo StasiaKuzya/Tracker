@@ -18,15 +18,10 @@ final class ScheduleViewController: UIViewController {
     
     weak var scheduleDelegate: ScheduleSelectionDelegate?
     
-    let daysOfWeek: [String: String] = [
-        "Понедельник": "Пн",
-        "Вторник": "Вт",
-        "Среда": "Ср",
-        "Четверг": "Чт",
-        "Пятница": "Пт",
-        "Суббота": "Сб",
-        "Воскресенье": "Вс"
-    ]
+    private let daysOfWeek: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+    
+    private let shortDaysOfWeek: [String] = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+
     private var selectedDays: [String] = []
     
     private let tableView: UITableView = {
@@ -63,9 +58,6 @@ final class ScheduleViewController: UIViewController {
         super.viewDidLoad()
         title = "Расписание"
         view.backgroundColor = .white
-
-        tableView.dataSource = self
-        tableView.delegate = self
         
         setupViews()
     }
@@ -75,18 +67,28 @@ final class ScheduleViewController: UIViewController {
     private func setupViews() {
         view.addSubview(tableView)
         view.addSubview(saveButton)
-
+        
+        tableView.layer.borderWidth = 1
+        tableView.layer.borderColor = view.backgroundColor?.cgColor
+        
+        tableView.layer.masksToBounds = true
+        tableView.layer.cornerRadius = 16
+        tableView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner, .layerMaxXMinYCorner]
+        
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            tableView.bottomAnchor.constraint(greaterThanOrEqualTo: saveButton.topAnchor, constant: 24),
+            tableView.bottomAnchor.constraint(greaterThanOrEqualTo: saveButton.topAnchor, constant: -24),
             
             saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             saveButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             saveButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             saveButton.heightAnchor.constraint(equalToConstant: 60)
         ])
+        
+        tableView.dataSource = self
+        tableView.delegate = self
     }
     
     @objc private func saveButtonTapped() {
@@ -111,10 +113,13 @@ extension ScheduleViewController: UITableViewDataSource {
        guard let cell = tableView.dequeueReusableCell(withIdentifier: "scheduleCell", for: indexPath) as? ScheduleTableViewCell else {
             fatalError("Unable to dequeue ScheduleTableViewCell")
         }
-        
+
+        let day = daysOfWeek[indexPath.row]
+        let shortDay = shortDaysOfWeek[indexPath.row]
+
         cell.selectionStyle = .none
-        cell.dayLabel.text = Array(daysOfWeek.keys)[indexPath.row]
-        cell.switchControl.isOn = selectedDays.contains(Array(daysOfWeek.keys)[indexPath.row])
+        cell.dayLabel.text = day
+        cell.switchControl.isOn = selectedDays.contains(shortDay)
         cell.switchControl.tag = indexPath.row
         
         updateSaveButtonState()
@@ -122,7 +127,7 @@ extension ScheduleViewController: UITableViewDataSource {
     }
     
     @objc func switchChanged(_ sender: UISwitch) {
-        let selectedDay = Array(daysOfWeek.values)[sender.tag]
+        let selectedDay = shortDaysOfWeek[sender.tag]
         
         if sender.isOn {
             selectedDays.append(selectedDay)

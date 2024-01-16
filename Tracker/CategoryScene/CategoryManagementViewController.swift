@@ -78,9 +78,6 @@ final class CategoryManagementViewController: UIViewController {
         super.viewDidLoad()
         title = "Категории"
         view.backgroundColor = .white
-        
-        tableView.dataSource = self
-        tableView.delegate = self
 
         setupViews()
         loadCategories()
@@ -93,11 +90,18 @@ final class CategoryManagementViewController: UIViewController {
         view.addSubview(emptyTrackerStateStackView)
         view.addSubview(addButton)
 
+        tableView.layer.borderWidth = 1
+        tableView.layer.borderColor = view.backgroundColor?.cgColor
+        
+        tableView.layer.masksToBounds = true
+        tableView.layer.cornerRadius = 16
+        tableView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner, .layerMaxXMinYCorner]
+        
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            tableView.bottomAnchor.constraint(greaterThanOrEqualTo: addButton.topAnchor, constant: 24),
+            tableView.bottomAnchor.constraint(greaterThanOrEqualTo: addButton.topAnchor, constant: -24),
 
             emptyTrackerStateStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             emptyTrackerStateStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -(60 + 16) / 2),
@@ -108,6 +112,9 @@ final class CategoryManagementViewController: UIViewController {
             addButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20)
         ])
 
+        tableView.dataSource = self
+        tableView.delegate = self
+        
         tableView.isHidden = true
         emptyTrackerStateImage.isHidden = true
         addButton.isHidden = true
