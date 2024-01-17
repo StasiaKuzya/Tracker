@@ -29,13 +29,14 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return stackViewV
     }()
     
-    var emojiLabel: UILabel = {
+    private let emojiLabel: UILabel = {
         let emojiLabel = UILabel()
+        emojiLabel.font = .systemFont(ofSize: 16)
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
         return emojiLabel
     }()
     
-    var nameLabel: UILabel = {
+    private let nameLabel: UILabel = {
         let nameLabel = UILabel()
         nameLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         nameLabel.textColor = .designWhite
@@ -61,7 +62,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return daysCountLabel
     }()
     
-    var button: UIButton = {
+    let button: UIButton = {
         let button = UIButton(type: .system)
         let addButtonImage = UIImage(named: "AddButton")
         button.setImage(addButtonImage, for: .normal)
@@ -112,11 +113,26 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         // Настройка элементов интерфейса
         emojiLabel.text = tracker.trackerEmoji
         nameLabel.text = tracker.trackerName
-        daysCountLabel.text = "0 дней"
-//        button.setTitle("+", for: .normal)
+//        daysCountLabel.text = "0 дней"
+        if let daysCount = tracker.calculateDays() {
+            daysCountLabel.text = "\(daysCount) дней"
+        } else {
+            daysCountLabel.text = "Ошибка при расчете дней"
+        }
     }
     
+    func updateDaysCount(_ daysCount: Int) {
+        daysCountLabel.text = "\(daysCount) дней"
+    }
+    
+    func setTrackerStatus(_ state: Bool) {
+        let imageName = state ? "AddButton" : "DoneButton"
+        let image = UIImage(named: imageName)
+        button.setImage(image, for: .normal)
+        button.isUserInteractionEnabled = state
+    }
+
     @objc private func buttonTapped() {
-        print("Button tapped!")
+        
     }
 }

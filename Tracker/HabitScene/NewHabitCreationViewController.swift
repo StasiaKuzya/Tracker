@@ -17,7 +17,32 @@ final class NewHabitCreationViewController: UIViewController {
     private let maxLength = 38
     
     private var selectedCategory: String?
-
+    
+    private let emojies = [
+        "🙂", "😻", "🌺", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪"
+    ]
+    
+    private let colors = [
+        UIColor.colorSection1,
+        UIColor.colorSection2,
+        UIColor.colorSection3,
+        UIColor.colorSection4,
+        UIColor.colorSection5,
+        UIColor.colorSection6,
+        UIColor.colorSection7,
+        UIColor.colorSection8,
+        UIColor.colorSection9,
+        UIColor.colorSection10,
+        UIColor.colorSection11,
+        UIColor.colorSection12,
+        UIColor.colorSection13,
+        UIColor.colorSection14,
+        UIColor.colorSection15,
+        UIColor.colorSection16,
+        UIColor.colorSection17,
+        UIColor.colorSection18
+    ]
+    
     private lazy var stackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [textField, tableView])
         stackView.axis = .vertical
@@ -51,6 +76,18 @@ final class NewHabitCreationViewController: UIViewController {
         tableView.separatorStyle = .singleLine
         tableView.layer.masksToBounds = true
         return tableView
+    }()
+    
+    let params = GeometricParams(cellCount: 6,
+                                 leftInset: 17,
+                                 rightInset: 17,
+                                 cellSpacing: 5)
+
+    private var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
     }()
     
     private lazy var stackViewH: UIStackView = {
@@ -124,6 +161,7 @@ final class NewHabitCreationViewController: UIViewController {
     
     private func setupViews() {
         view.addSubview(stackView)
+        view.addSubview(collectionView)
         view.addSubview(stackViewH)
         
         tableView.layer.borderWidth = 1
@@ -143,13 +181,27 @@ final class NewHabitCreationViewController: UIViewController {
             stackViewH.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             stackViewH.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             stackViewH.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            stackViewH.heightAnchor.constraint(equalToConstant: 60)
+            stackViewH.heightAnchor.constraint(equalToConstant: 60),
+            
+            collectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 32),
+            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: stackViewH.topAnchor, constant:  -16),
         ])
         
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(HabitTableViewCell.self, forCellReuseIdentifier: "cell")
         textField.delegate = self
+        
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(ColorEmojiCollectionViewCell.self, forCellWithReuseIdentifier: "emojiCellCV")
+        collectionView.register(SupplementaryColorEmojiView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "emojiHeader")
+        
+        collectionView.register(ColorEmojiCollectionViewCell.self, forCellWithReuseIdentifier: "colorCellCV")
+        collectionView.register(SupplementaryColorEmojiView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "colorHeader")
+
     }
     
     private func showCategoryScreen() {
@@ -262,5 +314,111 @@ extension NewHabitCreationViewController: ScheduleSelectionDelegate {
     func didSelectDays(_ days: [String]) {
         words[1].subtitle = days.joined(separator: ", ")
         tableView.reloadData()
+    }
+}
+    // MARK: - UICollectionViewDataSource
+
+extension NewHabitCreationViewController: UICollectionViewDataSource {
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return collectionView == self.collectionView ? 2 : 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if collectionView == self.collectionView {
+            return section == 0 ? emojies.count : colors.count
+        }
+        return section
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        // Создать ячейку
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: collectionView == self.collectionView ? "emojiCellCV" : "colorCellCV",
+            for: indexPath
+        ) as? ColorEmojiCollectionViewCell else {
+            return UICollectionViewCell()
+        }
+
+        // Настроить ячейку
+        cell.prepareForReuse()
+        if collectionView == self.collectionView {
+            if indexPath.section == 0 {
+                cell.titleLabel.text = emojies[indexPath.row]
+            } else {
+                let color = colors[indexPath.row]
+                cell.configureColor(color)
+
+            }
+        }
+
+        // Возвратить ячейку
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        var id: String
+        switch kind {
+        case UICollectionView.elementKindSectionHeader:
+            id = collectionView == self.collectionView ? "emojiHeader" : "colorHeader"
+        case UICollectionView.elementKindSectionFooter:
+            id = "footer"
+        default:
+            id = ""
+        }
+        
+        let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as! SupplementaryColorEmojiView
+        if collectionView == self.collectionView {
+            if kind == UICollectionView.elementKindSectionHeader {
+                view.titleLabel.text = indexPath.section == 0 ? "Emoji" : "Цвета"
+            }
+        }
+
+        return view
+    }
+}
+
+    // MARK: - UICollectionViewDelegateFlowLayout
+
+extension NewHabitCreationViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        
+        let indexPath = IndexPath(row: 0, section: section)
+        let headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: indexPath)
+        
+        return headerView.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width,
+                                                         height: UIView.layoutFittingExpandedSize.height),
+                                                  withHorizontalFittingPriority: .required,
+                                                  verticalFittingPriority: .fittingSizeLevel)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let availableWidth = collectionView.frame.width - params.paddingWidth
+        let cellWidth =  availableWidth / CGFloat(params.cellCount)
+        return CGSize(width: cellWidth, height: cellWidth)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 24, left: params.leftInset, bottom: 24, right: params.rightInset)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        params.cellSpacing
+    }
+}
+
+    // MARK: - NewHabitCreationViewController
+
+extension NewHabitCreationViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        
     }
 }

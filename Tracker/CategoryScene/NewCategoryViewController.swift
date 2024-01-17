@@ -10,6 +10,7 @@ import UIKit
 
 protocol NewCategoryDelegate: AnyObject {
     func didAddCategory(_ category: TrackerCategory)
+    func newCategoryVCDidCancel(_ vc: NewCategoryViewController)
 }
 
 final class NewCategoryViewController: UIViewController {
@@ -102,7 +103,8 @@ final class NewCategoryViewController: UIViewController {
         }
         let newCategory = TrackerCategory(title: categoryName, trackers: [])
         delegate?.didAddCategory(newCategory)
-        dismiss(animated: true, completion: nil)
+//        dismiss(animated: true, completion: nil)
+        delegate?.newCategoryVCDidCancel(self)
     }
 }
 
