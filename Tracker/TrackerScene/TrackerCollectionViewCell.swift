@@ -18,9 +18,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }()
     
     private lazy var stackViewV: UIStackView = {
-        let stackViewV = UIStackView(arrangedSubviews: [emojiLabel, nameLabel])
+        let stackViewV = UIStackView(arrangedSubviews: [emojiView, nameLabel])
         stackViewV.axis = .vertical
-        stackViewV.alignment = .fill
+        stackViewV.alignment = .leading
         stackViewV.spacing = 8
         stackViewV.distribution = .fill
         stackViewV.backgroundColor = colorView.backgroundColor
@@ -29,9 +29,17 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return stackViewV
     }()
     
+    private let emojiView: UIView = {
+        let emojiView = UIView()
+        emojiView.backgroundColor = .designWhiteOp
+        emojiView.layer.cornerRadius = 12
+        emojiView.translatesAutoresizingMaskIntoConstraints = false
+        return emojiView
+    }()
+    
     private let emojiLabel: UILabel = {
         let emojiLabel = UILabel()
-        emojiLabel.font = .systemFont(ofSize: 16)
+        emojiLabel.font = .systemFont(ofSize: 12)
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
         return emojiLabel
     }()
@@ -40,6 +48,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let nameLabel = UILabel()
         nameLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         nameLabel.textColor = .designWhite
+        nameLabel.numberOfLines = 2
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         return nameLabel
     }()
@@ -66,7 +75,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let button = UIButton(type: .system)
         let addButtonImage = UIImage(named: "AddButton")
         button.setImage(addButtonImage, for: .normal)
-        button.tintColor = .designBlue
+        button.sizeToFit()
+//        button.tintColor = .designBlue
         button.addTarget(
             self,
             action: #selector(buttonTapped),
@@ -74,7 +84,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-
+    
+    let checkBoxImageView: UIImageView = {
+        let checkBoxImageView = UIImageView()
+        checkBoxImageView.contentMode = .scaleAspectFit
+        checkBoxImageView.image = UIImage(named: "CheckBox")?.withRenderingMode(.alwaysTemplate)
+        checkBoxImageView.tintColor = .designWhite
+        checkBoxImageView.translatesAutoresizingMaskIntoConstraints = false
+        return checkBoxImageView
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
@@ -88,7 +107,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         colorView.addSubview(stackViewV)
         contentView.addSubview(colorView)
         contentView.addSubview(stackViewH)
-        
+        emojiView.addSubview(emojiLabel)
         // Настройка констрейнтов
         NSLayoutConstraint.activate([
             colorView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -96,10 +115,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             colorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             colorView.heightAnchor.constraint(equalTo: contentView.heightAnchor, multiplier: 0.6),
             
+            emojiView.heightAnchor.constraint(equalToConstant: 24),
+            emojiView.widthAnchor.constraint(equalToConstant: 24),
+            
             stackViewV.topAnchor.constraint(equalTo: colorView.topAnchor, constant: 12),
             stackViewV.leadingAnchor.constraint(equalTo: colorView.leadingAnchor, constant: 12),
             stackViewV.trailingAnchor.constraint(equalTo: colorView.trailingAnchor, constant: -12),
             stackViewV.bottomAnchor.constraint(equalTo: colorView.bottomAnchor, constant: -12),
+            
+            emojiLabel.centerXAnchor.constraint(equalTo: emojiView.centerXAnchor),
+            emojiLabel.centerYAnchor.constraint(equalTo: emojiView.centerYAnchor),
             
             stackViewH.topAnchor.constraint(equalTo: stackViewV.bottomAnchor, constant: 20),
             stackViewH.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
@@ -129,10 +154,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let imageName = state ? "AddButton" : "DoneButton"
         let image = UIImage(named: imageName)
         button.setImage(image, for: .normal)
-        button.isUserInteractionEnabled = state
+//        button.isUserInteractionEnabled = state
     }
 
     @objc private func buttonTapped() {
-        
+        let image = UIImage(named: "DoneButton")
+        button.setImage(image, for: .normal)
+        button.addSubview(checkBoxImageView)
+        NSLayoutConstraint.activate([
+            checkBoxImageView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
+            checkBoxImageView.centerYAnchor.constraint(equalTo: button.centerYAnchor),
+        ])
     }
 }

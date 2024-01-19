@@ -9,14 +9,14 @@ import Foundation
 import UIKit
 
 struct Tracker {
-    let trackerId: Int
+    let trackerId: UUID
     let trackerName: String
     let trackerColor: UIColor
     let trackerEmoji: String?
     let trackerSchedule: TrackerSchedule
     var trackerProgress: Int
     
-    init(trackerId: Int, trackerName: String, trackerColor: UIColor, trackerEmoji: String?, trackerSchedule: TrackerSchedule, trackerProgress: Int) {
+    init(trackerId: UUID, trackerName: String, trackerColor: UIColor, trackerEmoji: String?, trackerSchedule: TrackerSchedule, trackerProgress: Int) {
         self.trackerId = trackerId
         self.trackerName = trackerName
         self.trackerColor = trackerColor

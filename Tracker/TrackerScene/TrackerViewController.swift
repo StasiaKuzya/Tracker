@@ -20,7 +20,7 @@ final class TrackerViewController: UIViewController {
     }()
     
     private let searchController = UISearchController(searchResultsController: nil)
-//    private let datePicker = UIDatePicker()
+
     private var datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .date
@@ -30,6 +30,7 @@ final class TrackerViewController: UIViewController {
         if #available(iOS 14.0, *) {
             picker.preferredDatePickerStyle = .compact
         }
+        picker.locale = Locale(identifier: "ru_RU")
         return picker
     }()
     
@@ -61,11 +62,12 @@ final class TrackerViewController: UIViewController {
     }()
     
     // TODO:
-    private var trackers: [Tracker] = [] {
-        didSet {
-            updateUIForTrackers()
-        }
-    }
+   var trackers: [Tracker] = []
+//    {
+//        didSet {
+//            updateUIForTrackers()
+//        }
+//    }
     
     private var categories: [TrackerCategory] = []
     private var completedTrackers: [TrackerRecord] = []
@@ -96,25 +98,26 @@ final class TrackerViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .designWhite
         
-        let shockTracker = Tracker(
-              trackerId: 1,
-              trackerName: "Трекер 1",
-              trackerColor: .red,
-              trackerEmoji: "😱",
-              trackerSchedule: TrackerSchedule(
-                  trackerScheduleDaysOfWeek: Set(DayOfWeek.allCases),
-                  trackerScheduleStartTime: Date(),
-                  trackerScheduleEndTime: Date().addingTimeInterval(60 * 60 * 2)
-              ),
-              trackerProgress: 0
-          )
-          trackers.append(shockTracker)
-          trackers.append(shockTracker)
-          trackers.append(shockTracker)
+//        let shockTracker = Tracker(
+//              trackerId: UUID(),
+//              trackerName: "Трекер 1",
+//              trackerColor: .red,
+//              trackerEmoji: "😱",
+//              trackerSchedule: TrackerSchedule(
+//                  trackerScheduleDaysOfWeek: Set(DayOfWeek.allCases),
+//                  trackerScheduleStartTime: Date(),
+//                  trackerScheduleEndTime: Date().addingTimeInterval(60 * 60 * 2)
+//              ),
+//              trackerProgress: 0
+//          )
+//          trackers.append(shockTracker)
+//          trackers.append(shockTracker)
+//          trackers.append(shockTracker)
         
         addTBViews()
         addNCViews()
         setupViews()
+        updateUIForTrackers()
     }
     
     // MARK: -  Private Methods
@@ -164,7 +167,7 @@ final class TrackerViewController: UIViewController {
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            datePicker.widthAnchor.constraint(equalToConstant: 77)
+            datePicker.widthAnchor.constraint(equalToConstant: 120)
         ])
         
         collectionView.dataSource = self
@@ -174,7 +177,7 @@ final class TrackerViewController: UIViewController {
         collectionView.register(SupplementaryTrackerView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "footer")
     }
     
-    private func updateUIForTrackers() {
+     func updateUIForTrackers() {
         emptyTrackerStateLabel.isHidden = !trackers.isEmpty
         emptyTrackerStateImage.isHidden = !trackers.isEmpty
     }
@@ -191,6 +194,7 @@ final class TrackerViewController: UIViewController {
     
     private func showTrackerTypeSelectionScreen() {
         let trackerTypeSelectionVС = TrackerTypeSelectionViewController()
+        trackerTypeSelectionVС.delegate = self
         let navigationController = UINavigationController(rootViewController: trackerTypeSelectionVС)
         present(navigationController, animated: true, completion: nil)
     }
@@ -283,5 +287,24 @@ extension TrackerViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
 
+    }
+}
+
+    // MARK: - TrackerVCDataDelegate
+
+extension TrackerViewController: TrackerVCDataDelegate {
+    
+    func didUpdateTracker(_ tracker: Tracker) {
+        
+        trackers.append(tracker)
+        
+        DispatchQueue.main.async {
+            self.updateUIForTrackers()
+            self.collectionView.reloadData()
+        }
+    }
+    
+    func TrackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController) {
+        dismiss(animated: true, completion: nil)
     }
 }

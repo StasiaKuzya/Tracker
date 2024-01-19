@@ -8,9 +8,17 @@
 import Foundation
 import UIKit
 
+protocol TrackerVCDataDelegate: AnyObject {
+    func didUpdateTracker(_ tracker: Tracker)
+    func TrackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController)
+}
+
 final class TrackerTypeSelectionViewController: UIViewController {
 
     // MARK: -  Properties & Constants
+    
+    weak var delegate:TrackerVCDataDelegate?
+    private let trackerVC = TrackerViewController()
     
     private lazy var stackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [habitButton, irregularEventButton])
@@ -63,7 +71,6 @@ final class TrackerTypeSelectionViewController: UIViewController {
         self.title = "Создание трекера"
         navigationController?.isNavigationBarHidden = false
         setupViews()
-
     }
     
     // MARK: - Private Methods
@@ -82,6 +89,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
     
     private func showNewHabitCreationScreen() {
         let newHabitCreation = NewHabitCreationViewController()
+        newHabitCreation.delegate = self
         let newHabitCreationNC = UINavigationController(rootViewController: newHabitCreation)
         present(newHabitCreationNC, animated: true, completion: nil)
     }
@@ -103,4 +111,25 @@ final class TrackerTypeSelectionViewController: UIViewController {
         showCategoryScreen()
     }
 
+}
+
+    // MARK: - TrackerDataDelegate
+
+extension TrackerTypeSelectionViewController: TrackerDataDelegate {
+    
+    func didCreateTracker(_ tracker: Tracker) {
+        // Создать новый трекер с переданным именем
+        trackerVC.trackers.append(tracker)
+        
+        // Обновить UI для отображения нового трекера
+        trackerVC.updateUIForTrackers()
+        
+        // Обновить коллекцию
+        delegate?.didUpdateTracker(tracker)
+        delegate?.TrackerTypeSelectionVCDismissed(self)
+    }
+    
+    func NewHabitCreationVCDismissed(_ vc: NewHabitCreationViewController) {
+        dismiss(animated: true, completion: nil)
+    }
 }

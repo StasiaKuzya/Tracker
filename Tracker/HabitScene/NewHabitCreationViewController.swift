@@ -8,9 +8,15 @@
 import Foundation
 import UIKit
 
+protocol TrackerDataDelegate: AnyObject {
+    func didCreateTracker(_ tracker: Tracker)
+    func NewHabitCreationVCDismissed(_ vc: NewHabitCreationViewController)
+}
+
 final class NewHabitCreationViewController: UIViewController {
 
     // MARK: -  Properties & Constants
+    weak var delegate: TrackerDataDelegate?
     
     private var words: [(title: String, subtitle: String?)] = [("Категория", nil), ("Расписание", nil)]
 
@@ -225,7 +231,32 @@ final class NewHabitCreationViewController: UIViewController {
 //        guard let text = textField.text, text.count <= maxLength else {
 //            return
 //        }
-    }
+        let daysOfWeek: Set<DayOfWeek> = [.monday, .wednesday, .friday]
+        let startTime = Date()
+        let endTime = Date().addingTimeInterval(60 * 60 * 2)
+        let trackerSchedule = TrackerSchedule(trackerScheduleDaysOfWeek: daysOfWeek,
+                                              trackerScheduleStartTime: startTime,
+                                              trackerScheduleEndTime: endTime)
+
+        
+        guard let trackerName = textField.text, !trackerName.isEmpty else {
+            return
+        }
+
+        // Создание трекера с полными данными
+        let tracker = Tracker(
+            trackerId: UUID(),
+            trackerName: trackerName,
+            trackerColor: .colorSection1,
+            trackerEmoji: "😪",
+            trackerSchedule: trackerSchedule,
+            trackerProgress: 0
+        )
+
+        delegate?.didCreateTracker(tracker)
+        delegate?.NewHabitCreationVCDismissed(self)
+        }
+        
 }
 
     // MARK: - UITableViewDataSource
@@ -345,6 +376,7 @@ extension NewHabitCreationViewController: UICollectionViewDataSource {
         if collectionView == self.collectionView {
             if indexPath.section == 0 {
                 cell.titleLabel.text = emojies[indexPath.row]
+                cell.configureColor(.clear)
             } else {
                 let color = colors[indexPath.row]
                 cell.configureColor(color)
@@ -415,10 +447,30 @@ extension NewHabitCreationViewController: UICollectionViewDelegateFlowLayout {
 
 extension NewHabitCreationViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? ColorEmojiCollectionViewCell else {
+            return
+        }
         
+        if indexPath.section == 0 {
+            cell.titleLabel.text = emojies[indexPath.row]
+            cell.pickConfiguredColor(.designBackground)
+        } else {
+            let color = colors[indexPath.row]
+            cell.pickConfiguredColor(color)
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? ColorEmojiCollectionViewCell else {
+            return
+        }
         
+        if indexPath.section == 0 {
+            cell.titleLabel.text = emojies[indexPath.row]
+            cell.configureColor(.clear)
+        } else {
+            let color = colors[indexPath.row]
+            cell.configureColor(color)
+        }
     }
 }
