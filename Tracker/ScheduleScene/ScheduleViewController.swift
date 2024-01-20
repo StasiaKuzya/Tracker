@@ -10,6 +10,7 @@ import UIKit
 
 protocol ScheduleSelectionDelegate: AnyObject {
     func didSelectDays(_ days: [String])
+    func scheduleVCDismissed(_ vc: ScheduleViewController)
 }
 
 final class ScheduleViewController: UIViewController {
@@ -100,8 +101,7 @@ final class ScheduleViewController: UIViewController {
         } else {
             scheduleDelegate?.didSelectDays(selectedDays)
         }
-        print("Выбранные дни: \(selectedDays)")
-        dismiss(animated: true, completion: nil)
+        scheduleDelegate?.scheduleVCDismissed(self)
     }
 }
 

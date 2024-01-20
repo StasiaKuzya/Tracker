@@ -10,7 +10,8 @@ import UIKit
 
 protocol TrackerVCDataDelegate: AnyObject {
     func didUpdateTracker(_ tracker: Tracker)
-    func TrackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController)
+    func selectedCategory(_ category: String)
+    func trackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController)
 }
 
 final class TrackerTypeSelectionViewController: UIViewController {
@@ -126,10 +127,14 @@ extension TrackerTypeSelectionViewController: TrackerDataDelegate {
         
         // Обновить коллекцию
         delegate?.didUpdateTracker(tracker)
-        delegate?.TrackerTypeSelectionVCDismissed(self)
+        delegate?.trackerTypeSelectionVCDismissed(self)
     }
     
-    func NewHabitCreationVCDismissed(_ vc: NewHabitCreationViewController) {
+    func selectedCategory(_ category: String) {
+        delegate?.selectedCategory(category)
+    }
+    
+    func newHabitCreationVCDismissed(_ vc: NewHabitCreationViewController) {
         dismiss(animated: true, completion: nil)
     }
 }

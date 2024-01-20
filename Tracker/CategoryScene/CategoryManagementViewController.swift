@@ -10,6 +10,7 @@ import UIKit
 
 protocol CategorySelectionDelegate: AnyObject {
     func didSelectCategory(_ category: String)
+    func categoryManagementVCDismissed(_ vc: CategoryManagementViewController)
 }
 
 final class CategoryManagementViewController: UIViewController {
@@ -79,7 +80,12 @@ final class CategoryManagementViewController: UIViewController {
         super.viewDidLoad()
         title = "Категории"
         view.backgroundColor = .white
-
+        
+        let mockCategory = TrackerCategory(
+            title: "Важное",
+            trackers: [])
+        categories.append(mockCategory)
+        
         setupViews()
         loadCategories()
         print("count cat \(categories.count) и \(String(describing: tableCount))")
@@ -124,16 +130,14 @@ final class CategoryManagementViewController: UIViewController {
         tableView.delegate = self
         
         tableView.isHidden = true
-        emptyTrackerStateImage.isHidden = true
-        addButton.isHidden = true
+        emptyTrackerStateStackView.isHidden = true
     }
 
     private func loadCategories() {
         // Загрузка категорий из хранилища
 
         if categories.isEmpty {
-            emptyTrackerStateImage.isHidden = false
-            addButton.isHidden = false
+            emptyTrackerStateStackView.isHidden = false
             print("empty")
         } else {
             tableView.isHidden = false
@@ -175,7 +179,11 @@ extension CategoryManagementViewController: UITableViewDelegate {
         if let cell = tableView.cellForRow(at: indexPath) {
             cell.accessoryType = .checkmark
         }
-        dismiss(animated: true, completion: nil)
+        
+        let selectedCategory = categories[indexPath.row]
+        categorySelectionDelegate?.didSelectCategory(selectedCategory.title)
+        categorySelectionDelegate?.categoryManagementVCDismissed(self)
+//        dismiss(animated: true, completion: nil)
     }
 }
     // MARK: - NewCategoryDelegate

@@ -9,9 +9,9 @@ import Foundation
 import UIKit
 
 final class SupplementaryTrackerView: UICollectionReusableView {
-    let titleLabel: UILabel = {
+    var titleLabel: UILabel = {
         let titleLabel = UILabel()
-        titleLabel.text = "Категория"
+//        titleLabel.text = "Категория"
         titleLabel.font = UIFont.systemFont(ofSize: 19, weight: .bold)
         return titleLabel
     }()

@@ -71,6 +71,7 @@ final class TrackerViewController: UIViewController {
     
     private var categories: [TrackerCategory] = []
     private var completedTrackers: [TrackerRecord] = []
+    var selectedCategory: String?
     
     let params = GeometricParams(cellCount: 2,
                                  leftInset: 16,
@@ -240,7 +241,13 @@ extension TrackerViewController: UICollectionViewDataSource {
             id = ""
         }
         
-        let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as! SupplementaryTrackerView
+        guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as? SupplementaryTrackerView else {
+            fatalError("Failed to dequeue SupplementaryTrackerView")
+        }
+        
+        view.titleLabel.text = selectedCategory
+        print("header name \(String(describing: selectedCategory))")
+        
         return view
     }
 }
@@ -300,11 +307,54 @@ extension TrackerViewController: TrackerVCDataDelegate {
         
         DispatchQueue.main.async {
             self.updateUIForTrackers()
-            self.collectionView.reloadData()
+            self.updateCollectionViewAnimated()
         }
     }
     
-    func TrackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController) {
+    func trackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController) {
         dismiss(animated: true, completion: nil)
+    }
+    
+    func selectedCategory(_ category: String) {
+        DispatchQueue.main.async {
+            self.selectedCategory = category
+            print("header \(category)")
+        }
+    }
+    
+    func updateCollectionViewAnimated() {
+        let newTracker = self.trackers.count - 1
+        let indexPath = IndexPath(row: newTracker, section: 0)
+        
+        self.collectionView.performBatchUpdates {
+            self.collectionView.insertItems(at: [indexPath])
+        } completion: { [weak self] _ in
+            self?.updateSectionHeaderAnimated()
+        }
+    }
+    
+    func updateSectionHeaderAnimated() {
+        guard let selectedCategory = selectedCategory else {
+            return
+        }
+        
+        let newTrackerCategory = TrackerCategory(title: selectedCategory, trackers: trackers)
+        
+        categories.append(newTrackerCategory)
+        
+        // Определите секции, которые нужно обновить
+        let sectionIndex = 0
+        
+        // Обновляем секции анимированно
+        collectionView.performBatchUpdates({
+            // Вставляем новые элементы, если это необходимо
+            let newTracker = self.trackers.count - 1
+            let indexPath = IndexPath(row: newTracker, section: sectionIndex)
+            self.collectionView.insertItems(at: [indexPath])
+            
+            // Загружаем секции
+            self.collectionView.reloadSections(IndexSet(integer: sectionIndex))
+        }, completion: { _ in
+        })
     }
 }

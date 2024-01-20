@@ -10,7 +10,8 @@ import UIKit
 
 protocol TrackerDataDelegate: AnyObject {
     func didCreateTracker(_ tracker: Tracker)
-    func NewHabitCreationVCDismissed(_ vc: NewHabitCreationViewController)
+    func selectedCategory(_ category: String)
+    func newHabitCreationVCDismissed(_ vc: NewHabitCreationViewController)
 }
 
 final class NewHabitCreationViewController: UIViewController {
@@ -211,12 +212,14 @@ final class NewHabitCreationViewController: UIViewController {
     }
     
     private func showCategoryScreen() {
+        textField.resignFirstResponder()
         let categoryManagementVC = CategoryManagementViewController()
         categoryManagementVC.categorySelectionDelegate = self
         let categoryManagementNC = UINavigationController(rootViewController: categoryManagementVC)
         present(categoryManagementNC, animated: true, completion: nil)
     }
     private func showScheduleScreen() {
+        textField.resignFirstResponder()
         let scheduleVC = ScheduleViewController()
         scheduleVC.scheduleDelegate = self
         let scheduleNC = UINavigationController(rootViewController: scheduleVC)
@@ -224,6 +227,7 @@ final class NewHabitCreationViewController: UIViewController {
     }
 
     @objc private func cancelButtonTapped() {
+        textField.resignFirstResponder()
         dismiss(animated: true)
     }
 
@@ -237,12 +241,11 @@ final class NewHabitCreationViewController: UIViewController {
         let trackerSchedule = TrackerSchedule(trackerScheduleDaysOfWeek: daysOfWeek,
                                               trackerScheduleStartTime: startTime,
                                               trackerScheduleEndTime: endTime)
-
         
         guard let trackerName = textField.text, !trackerName.isEmpty else {
             return
         }
-
+        
         // Создание трекера с полными данными
         let tracker = Tracker(
             trackerId: UUID(),
@@ -252,11 +255,11 @@ final class NewHabitCreationViewController: UIViewController {
             trackerSchedule: trackerSchedule,
             trackerProgress: 0
         )
-
-        delegate?.didCreateTracker(tracker)
-        delegate?.NewHabitCreationVCDismissed(self)
-        }
         
+        delegate?.didCreateTracker(tracker)
+        delegate?.selectedCategory(selectedCategory ?? "Неназванные категории")
+        delegate?.newHabitCreationVCDismissed(self)
+    }
 }
 
     // MARK: - UITableViewDataSource
@@ -337,6 +340,10 @@ extension NewHabitCreationViewController: CategorySelectionDelegate {
         print("categ \(category)")
         tableView.reloadData()
     }
+    
+    func categoryManagementVCDismissed(_ vc: CategoryManagementViewController) {
+        dismiss(animated: true, completion: nil)
+    }
 }
 
     // MARK: - ScheduleSelectionDelegate
@@ -345,6 +352,10 @@ extension NewHabitCreationViewController: ScheduleSelectionDelegate {
     func didSelectDays(_ days: [String]) {
         words[1].subtitle = days.joined(separator: ", ")
         tableView.reloadData()
+    }
+    
+    func scheduleVCDismissed(_ vc: ScheduleViewController) {
+        dismiss(animated: true, completion: nil)
     }
 }
     // MARK: - UICollectionViewDataSource
