@@ -27,26 +27,9 @@ struct Tracker {
 }
 
 struct TrackerSchedule {
-    let trackerScheduleDaysOfWeek: Set<DayOfWeek>
-    let trackerScheduleStartTime: Date
-    let trackerScheduleEndTime: Date
+//    let trackerScheduleDaysOfWeek: Set<DayOfWeek>
+    let trackerScheduleDaysOfWeek: [String]
+//    let trackerScheduleStartTime: Date
+//    let trackerScheduleEndTime: Date
 
-}
-
-enum DayOfWeek: String, CaseIterable {
-    case sunday, monday, tuesday, wednesday, thursday, friday, saturday
-}
-
-extension Tracker {
-    func calculateDays() -> Int? {
-        let calendar = Calendar.current
-
-        guard let startDate = calendar.date(from: calendar.dateComponents([.year, .month, .day], from: trackerSchedule.trackerScheduleStartTime)),
-              let endDate = calendar.date(from: calendar.dateComponents([.year, .month, .day], from: trackerSchedule.trackerScheduleEndTime)) else {
-            return nil
-        }
-
-        let dateComponents = calendar.dateComponents([.day], from: startDate, to: endDate)
-        return dateComponents.day
-    }
 }

@@ -96,11 +96,7 @@ final class ScheduleViewController: UIViewController {
     }
     
     @objc private func saveButtonTapped() {
-        if selectedDays.count == daysOfWeek.count {
-            scheduleDelegate?.didSelectDays(["Каждый день"])
-        } else {
-            scheduleDelegate?.didSelectDays(selectedDays)
-        }
+        scheduleDelegate?.didSelectDays(selectedDays)
         scheduleDelegate?.scheduleVCDismissed(self)
     }
 }

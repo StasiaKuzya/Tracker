@@ -49,6 +49,7 @@ final class NewHabitCreationViewController: UIViewController {
         UIColor.colorSection17,
         UIColor.colorSection18
     ]
+    private var selectedDays: [String] = []
     
     private lazy var stackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [textField, tableView])
@@ -234,13 +235,6 @@ final class NewHabitCreationViewController: UIViewController {
     @objc private func creationButtonTapped() {
 //        guard let text = textField.text, text.count <= maxLength else {
 //            return
-//        }
-        let daysOfWeek: Set<DayOfWeek> = [.monday, .wednesday, .friday]
-        let startTime = Date()
-        let endTime = Date().addingTimeInterval(60 * 60 * 2)
-        let trackerSchedule = TrackerSchedule(trackerScheduleDaysOfWeek: daysOfWeek,
-                                              trackerScheduleStartTime: startTime,
-                                              trackerScheduleEndTime: endTime)
         
         guard let trackerName = textField.text, !trackerName.isEmpty else {
             return
@@ -252,7 +246,12 @@ final class NewHabitCreationViewController: UIViewController {
             trackerName: trackerName,
             trackerColor: .colorSection1,
             trackerEmoji: "😪",
-            trackerSchedule: trackerSchedule,
+            trackerSchedule: TrackerSchedule(
+//                    trackerScheduleDaysOfWeek: [words[1].subtitle ?? "Каждый день"]
+                    trackerScheduleDaysOfWeek: selectedDays
+//                    trackerScheduleStartTime: Date(),
+//                    trackerScheduleEndTime: Date().addingTimeInterval(60 * 60 * 2)
+                ),
             trackerProgress: 0
         )
         
@@ -350,7 +349,12 @@ extension NewHabitCreationViewController: CategorySelectionDelegate {
 
 extension NewHabitCreationViewController: ScheduleSelectionDelegate {
     func didSelectDays(_ days: [String]) {
-        words[1].subtitle = days.joined(separator: ", ")
+        selectedDays = days
+        if days.count == 7 {
+            words[1].subtitle = "Каждый день"
+        } else {
+            words[1].subtitle = days.joined(separator: ", ")
+        }
         tableView.reloadData()
     }
     

@@ -8,10 +8,17 @@
 import Foundation
 import UIKit
 
+protocol TrackerCellDelegate: AnyObject {
+    func trackerCellDidTapButton(_ cell: TrackerCollectionViewCell)
+}
+
 final class TrackerCollectionViewCell: UICollectionViewCell {
+    
+    weak var delegate: TrackerCellDelegate?
+    
     private let colorView: UIView = {
-        let colorView = UIView()
-        colorView.backgroundColor = .designBlue
+        var colorView = UIView()
+//        colorView.backgroundColor = .designBlue
         colorView.layer.cornerRadius = 16
         colorView.translatesAutoresizingMaskIntoConstraints = false
         return colorView
@@ -75,7 +82,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let button = UIButton(type: .system)
         let addButtonImage = UIImage(named: "AddButton")
         button.setImage(addButtonImage, for: .normal)
-        button.sizeToFit()
+//        button.sizeToFit()
 //        button.tintColor = .designBlue
         button.addTarget(
             self,
@@ -130,7 +137,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             stackViewH.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
             stackViewH.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
             stackViewH.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
-//
         ])
     }
 
@@ -138,12 +144,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         // Настройка элементов интерфейса
         emojiLabel.text = tracker.trackerEmoji
         nameLabel.text = tracker.trackerName
+        colorView.backgroundColor = tracker.trackerColor
+        button.tintColor = tracker.trackerColor
 //        daysCountLabel.text = "0 дней"
-        if let daysCount = tracker.calculateDays() {
-            daysCountLabel.text = "\(daysCount) дней"
-        } else {
-            daysCountLabel.text = "Ошибка при расчете дней"
-        }
+        daysCountLabel.text = "\(tracker.trackerSchedule.trackerScheduleDaysOfWeek) дней"
+        print("\(tracker.trackerSchedule.trackerScheduleDaysOfWeek) дней")
     }
     
     func updateDaysCount(_ daysCount: Int) {
@@ -158,12 +163,19 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
 
     @objc private func buttonTapped() {
-        let image = UIImage(named: "DoneButton")
-        button.setImage(image, for: .normal)
-        button.addSubview(checkBoxImageView)
-        NSLayoutConstraint.activate([
-            checkBoxImageView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
-            checkBoxImageView.centerYAnchor.constraint(equalTo: button.centerYAnchor),
-        ])
+        if let currentImage = button.imageView?.image, currentImage == UIImage(named: "AddButton") {
+            
+            let image = UIImage(named: "DoneButton")
+            button.setImage(image, for: .normal)
+            button.addSubview(checkBoxImageView)
+            NSLayoutConstraint.activate([
+                checkBoxImageView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
+                checkBoxImageView.centerYAnchor.constraint(equalTo: button.centerYAnchor),
+            ])
+        } else {
+            let image = UIImage(named: "AddButton")
+            button.setImage(image, for: .normal)
+            checkBoxImageView.removeFromSuperview()
+        }
     }
 }

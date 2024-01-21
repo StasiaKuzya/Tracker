@@ -24,9 +24,9 @@ final class TrackerViewController: UIViewController {
     private var datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .date
-        picker.addTarget(self,
-                         action: #selector(datePickerValueChanged(_:)),
-                         for: .valueChanged)
+//        picker.addTarget(self,
+//                         action: #selector(datePickerValueChanged(_:)),
+//                         for: .valueChanged)
         if #available(iOS 14.0, *) {
             picker.preferredDatePickerStyle = .compact
         }
@@ -68,10 +68,14 @@ final class TrackerViewController: UIViewController {
 //            updateUIForTrackers()
 //        }
 //    }
-    
+    private var filteredTrackers: [Tracker] = []
+//    private var filteredTrackers = [Tracker]()
+
     private var categories: [TrackerCategory] = []
-    private var completedTrackers: [TrackerRecord] = []
+    var completedTrackers: [TrackerRecord] = []
     var selectedCategory: String?
+    
+    private var currentDate: Date = Date()
     
     let params = GeometricParams(cellCount: 2,
                                  leftInset: 16,
@@ -138,6 +142,10 @@ final class TrackerViewController: UIViewController {
             navigationItem.leftBarButtonItem = addButton
             
             navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+            datePicker.addTarget(
+                self,
+                action: #selector(datePickerValueChanged(_:)),
+                for: .valueChanged)
             
             navigationController.navigationBar.prefersLargeTitles = true
             navigationItem.largeTitleDisplayMode = .always
@@ -179,8 +187,18 @@ final class TrackerViewController: UIViewController {
     }
     
      func updateUIForTrackers() {
-        emptyTrackerStateLabel.isHidden = !trackers.isEmpty
-        emptyTrackerStateImage.isHidden = !trackers.isEmpty
+//        emptyTrackerStateLabel.isHidden = !trackers.isEmpty
+//        emptyTrackerStateImage.isHidden = !trackers.isEmpty
+         
+        emptyTrackerStateLabel.isHidden = !filteredTrackers.isEmpty
+        emptyTrackerStateImage.isHidden = !filteredTrackers.isEmpty
+    }
+        
+    private func dayOfWeekString(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "E"
+        formatter.locale = Locale(identifier: "ru_RU")
+        return formatter.string(from: date).capitalized
     }
     
     @objc private func addTrackerButtonTapped() {
@@ -188,9 +206,10 @@ final class TrackerViewController: UIViewController {
     }
     
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
-        let selectedDate = sender.date
-        let formattedDate = dateFormatter.string(from: selectedDate)
-        print("Выбранная дата: \(formattedDate)")
+        currentDate = sender.date
+        print("selected date \(dayOfWeekString(for: currentDate))")
+        
+        updateUIForTrackersForDate()
     }
     
     private func showTrackerTypeSelectionScreen() {
@@ -213,7 +232,8 @@ extension TrackerViewController: UISearchResultsUpdating {
 extension TrackerViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return trackers.count
+//        return trackers.count
+        return filteredTrackers.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -222,8 +242,10 @@ extension TrackerViewController: UICollectionViewDataSource {
         
         // Настроить ячейку
         cell.prepareForReuse()
-        if indexPath.item < trackers.count {
-             cell.configure(with: trackers[indexPath.item])
+//        if indexPath.item < trackers.count {
+//            cell.configure(with: trackers[indexPath.item])
+        if indexPath.item < filteredTrackers.count {
+             cell.configure(with: filteredTrackers[indexPath.item])
          }
         
         // Возвратить ячейку
@@ -245,6 +267,7 @@ extension TrackerViewController: UICollectionViewDataSource {
             fatalError("Failed to dequeue SupplementaryTrackerView")
         }
         
+        view.isHidden = filteredTrackers.isEmpty
         view.titleLabel.text = selectedCategory
         print("header name \(String(describing: selectedCategory))")
         
@@ -304,11 +327,9 @@ extension TrackerViewController: TrackerVCDataDelegate {
     func didUpdateTracker(_ tracker: Tracker) {
         
         trackers.append(tracker)
-        
-        DispatchQueue.main.async {
-            self.updateUIForTrackers()
-            self.updateCollectionViewAnimated()
-        }
+//        updateUI()
+        updateUIForTrackersForDate()
+//        updateCollectionViewAnimated()
     }
     
     func trackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController) {
@@ -322,39 +343,107 @@ extension TrackerViewController: TrackerVCDataDelegate {
         }
     }
     
-    func updateCollectionViewAnimated() {
-        let newTracker = self.trackers.count - 1
-        let indexPath = IndexPath(row: newTracker, section: 0)
-        
-        self.collectionView.performBatchUpdates {
-            self.collectionView.insertItems(at: [indexPath])
-        } completion: { [weak self] _ in
-            self?.updateSectionHeaderAnimated()
+    func updateUIForTrackersForDate() {
+        guard !trackers.isEmpty else {
+            return
         }
+        filteredTrackers = trackers.filter { tracker in
+            let trackerDays = tracker.trackerSchedule.trackerScheduleDaysOfWeek
+            let selectedDateString = dayOfWeekString(for: currentDate)
+            return trackerDays.contains(selectedDateString)
+        }
+        
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+        }
+        updateUIForTrackers()
     }
+    
+//    func updateUI() {
+//        DispatchQueue.main.async {
+//            self.updateUIForTrackers()
+//            self.updateUIForTrackersForDate()
+//        }
+//    }
+    
+//    func updateCollectionViewAnimated() {
+//
+//        let newTracker = self.filteredTrackers.count - 1
+//        let indexPath = IndexPath(row: newTracker, section: 0)
+//
+//        self.collectionView.performBatchUpdates {
+//            if !self.filteredTrackers.isEmpty {
+//                self.collectionView.insertItems(at: [indexPath])
+//            }
+//        } completion: { [weak self] _ in
+//            self?.updateSectionHeaderAnimated()
+//        }
+//    }
     
     func updateSectionHeaderAnimated() {
         guard let selectedCategory = selectedCategory else {
             return
         }
-        
-        let newTrackerCategory = TrackerCategory(title: selectedCategory, trackers: trackers)
+        let newTrackerCategory = TrackerCategory(title: selectedCategory, trackers: filteredTrackers)
         
         categories.append(newTrackerCategory)
         
-        // Определите секции, которые нужно обновить
         let sectionIndex = 0
         
-        // Обновляем секции анимированно
         collectionView.performBatchUpdates({
-            // Вставляем новые элементы, если это необходимо
-            let newTracker = self.trackers.count - 1
+            let newTracker = self.filteredTrackers.count - 1
             let indexPath = IndexPath(row: newTracker, section: sectionIndex)
             self.collectionView.insertItems(at: [indexPath])
             
-            // Загружаем секции
             self.collectionView.reloadSections(IndexSet(integer: sectionIndex))
         }, completion: { _ in
         })
     }
+    
+//
+//    func updateUIForTrackersForDate() {
+//            guard !trackers.isEmpty else {
+//                return
+//            }
+//
+//            // Сохраняем индексы элементов, которые нужно удалить
+//            let indicesToDelete = filteredTrackers.enumerated()
+//                .filter { (index, tracker) in
+//                    let trackerDays = tracker.trackerSchedule.trackerScheduleDaysOfWeek
+//                    let selectedDateString = dayOfWeekString(for: currentDate)
+//                    return !trackerDays.contains(selectedDateString)
+//                }
+//                .map { (index, tracker) in
+//                    return IndexPath(row: index, section: 0)
+//                }
+//
+//            // Удаляем элементы, которые не соответствуют выбранному дню
+//            collectionView.deleteItems(at: indicesToDelete)
+//
+//            // Фильтруем трекеры
+//            filteredTrackers = trackers.filter { tracker in
+//                let trackerDays = tracker.trackerSchedule.trackerScheduleDaysOfWeek
+//                let selectedDateString = dayOfWeekString(for: currentDate)
+//                return trackerDays.contains(selectedDateString)
+//            }
+//
+//            // Обновляем UI анимированно
+//            DispatchQueue.main.async {
+//                self.collectionView.performBatchUpdates({
+//                    // Вставляем новые элементы
+//                    let indicesToInsert = self.filteredTrackers.enumerated()
+//                        .filter { (index, tracker) in
+//                            return !self.collectionView.indexPathsForVisibleItems.contains { $0.item == index && $0.section == 0 }
+//                        }
+//                        .map { (index, tracker) in
+//                            return IndexPath(row: index, section: 0)
+//                        }
+//
+//                    self.collectionView.insertItems(at: indicesToInsert)
+//                }, completion: { _ in
+//                    // Завершаем обновление
+//                    self.updateSectionHeaderAnimated()
+//                })
+//            }
+//        }
 }
