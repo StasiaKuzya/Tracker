@@ -8,17 +8,20 @@
 import Foundation
 import UIKit
 
-protocol TrackerCellDelegate: AnyObject {
-    func trackerCellDidTapButton(_ cell: TrackerCollectionViewCell)
+protocol TrackerCellDelegate: AnyObject{
+    func completeTracker(id: UUID, at indexPath: IndexPath)
+    func uncompleteTracker(id: UUID, at indexPath: IndexPath)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
     
     weak var delegate: TrackerCellDelegate?
+    private var completedForDate: Bool = false
+    private var trackerId: UUID?
+    private var indexPath: IndexPath?
     
     private let colorView: UIView = {
         var colorView = UIView()
-//        colorView.backgroundColor = .designBlue
         colorView.layer.cornerRadius = 16
         colorView.translatesAutoresizingMaskIntoConstraints = false
         return colorView
@@ -82,8 +85,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let button = UIButton(type: .system)
         let addButtonImage = UIImage(named: "AddButton")
         button.setImage(addButtonImage, for: .normal)
-//        button.sizeToFit()
-//        button.tintColor = .designBlue
+        //        button.sizeToFit()
+        //        button.tintColor = .designBlue
         button.addTarget(
             self,
             action: #selector(buttonTapped),
@@ -140,42 +143,50 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         ])
     }
 
-    func configure(with tracker: Tracker) {
-        // Настройка элементов интерфейса
+    func configure(
+        with tracker: Tracker,
+        completedForDate: Bool,
+        completedDays: Int,
+        indexPath: IndexPath
+    ) {
+        self.trackerId = tracker.trackerId
+        self.completedForDate = completedForDate
+        self.indexPath = indexPath
+        
         emojiLabel.text = tracker.trackerEmoji
         nameLabel.text = tracker.trackerName
         colorView.backgroundColor = tracker.trackerColor
         button.tintColor = tracker.trackerColor
-//        daysCountLabel.text = "0 дней"
-        daysCountLabel.text = "\(tracker.trackerSchedule.trackerScheduleDaysOfWeek) дней"
-        print("\(tracker.trackerSchedule.trackerScheduleDaysOfWeek) дней")
-    }
-    
-    func updateDaysCount(_ daysCount: Int) {
-        daysCountLabel.text = "\(daysCount) дней"
-    }
-    
-    func setTrackerStatus(_ state: Bool) {
-        let imageName = state ? "AddButton" : "DoneButton"
-        let image = UIImage(named: imageName)
-        button.setImage(image, for: .normal)
-//        button.isUserInteractionEnabled = state
-    }
-
-    @objc private func buttonTapped() {
-        if let currentImage = button.imageView?.image, currentImage == UIImage(named: "AddButton") {
-            
+        daysCountLabel.text = "\(completedDays) дней"
+        
+        if completedForDate {
             let image = UIImage(named: "DoneButton")
             button.setImage(image, for: .normal)
-            button.addSubview(checkBoxImageView)
-            NSLayoutConstraint.activate([
-                checkBoxImageView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
-                checkBoxImageView.centerYAnchor.constraint(equalTo: button.centerYAnchor),
-            ])
+            buttonDoneUmageSetUp()
         } else {
             let image = UIImage(named: "AddButton")
             button.setImage(image, for: .normal)
             checkBoxImageView.removeFromSuperview()
+        }
+    }
+    
+    private func buttonDoneUmageSetUp() {
+        button.addSubview(checkBoxImageView)
+        NSLayoutConstraint.activate([
+            checkBoxImageView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
+            checkBoxImageView.centerYAnchor.constraint(equalTo: button.centerYAnchor),
+        ])
+    }
+    
+    @objc private func buttonTapped() {
+        guard let trackerId = trackerId, let indexPath = indexPath else {
+            assertionFailure("no trackerId")
+            return }
+        
+        if completedForDate {
+            delegate?.uncompleteTracker(id: trackerId, at: indexPath)
+        } else {
+            delegate?.completeTracker(id: trackerId, at: indexPath)
         }
     }
 }

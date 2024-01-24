@@ -18,9 +18,12 @@ final class NewHabitCreationViewController: UIViewController {
 
     // MARK: -  Properties & Constants
     weak var delegate: TrackerDataDelegate?
+    var selectedIndexes: [Int: Int] = [:]
+    var selectedEmoji: String?
+    var selectedColor: UIColor?
     
     private var words: [(title: String, subtitle: String?)] = [("Категория", nil), ("Расписание", nil)]
-
+    
     private let maxLength = 38
     
     private var selectedCategory: String?
@@ -156,7 +159,7 @@ final class NewHabitCreationViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         
-        title = "Новая привычка"
+//        title = "Новая привычка"
         
         setupViews()
         tableView.reloadData()
@@ -236,21 +239,21 @@ final class NewHabitCreationViewController: UIViewController {
 //        guard let text = textField.text, text.count <= maxLength else {
 //            return
         
-        guard let trackerName = textField.text, !trackerName.isEmpty else {
+        guard let trackerName = textField.text, !trackerName.isEmpty,
+              let selectedEmoji = selectedEmoji,
+              let selectedColor = selectedColor else {
             return
         }
+        
         
         // Создание трекера с полными данными
         let tracker = Tracker(
             trackerId: UUID(),
             trackerName: trackerName,
-            trackerColor: .colorSection1,
-            trackerEmoji: "😪",
+            trackerColor: selectedColor,
+            trackerEmoji: selectedEmoji,
             trackerSchedule: TrackerSchedule(
-//                    trackerScheduleDaysOfWeek: [words[1].subtitle ?? "Каждый день"]
                     trackerScheduleDaysOfWeek: selectedDays
-//                    trackerScheduleStartTime: Date(),
-//                    trackerScheduleEndTime: Date().addingTimeInterval(60 * 60 * 2)
                 ),
             trackerProgress: 0
         )
@@ -466,26 +469,29 @@ extension NewHabitCreationViewController: UICollectionViewDelegate {
             return
         }
         
-        if indexPath.section == 0 {
-            cell.titleLabel.text = emojies[indexPath.row]
-            cell.pickConfiguredColor(.designBackground)
-        } else {
-            let color = colors[indexPath.row]
-            cell.pickConfiguredColor(color)
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        guard let cell = collectionView.cellForItem(at: indexPath) as? ColorEmojiCollectionViewCell else {
-            return
+        // Проверка, был ли уже выбран элемент в данной секции
+        if let selectedRow = selectedIndexes[indexPath.section] {
+            // Снятие выделения с предыдущего выбранного элемента
+            let previousIndexPath = IndexPath(row: selectedRow, section: indexPath.section)
+            if let previousCell = collectionView.cellForItem(at: previousIndexPath) as? ColorEmojiCollectionViewCell {
+                if indexPath.section == 0 {
+                    previousCell.configureColor(.clear)
+                } else {
+                    let color = colors[selectedRow]
+                    previousCell.configureColor(color)
+                }
+            }
         }
         
+        // Обновление словаря с выбранным индексом в данной секции
+        selectedIndexes[indexPath.section] = indexPath.row
+        
         if indexPath.section == 0 {
-            cell.titleLabel.text = emojies[indexPath.row]
-            cell.configureColor(.clear)
+            selectedEmoji = emojies[indexPath.row]
+            cell.pickConfiguredColor(.designBackground)
         } else {
-            let color = colors[indexPath.row]
-            cell.configureColor(color)
+            selectedColor = colors[indexPath.row]
+            cell.pickConfiguredColor(selectedColor ?? .designBackground)
         }
     }
 }

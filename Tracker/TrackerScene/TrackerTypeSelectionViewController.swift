@@ -91,14 +91,17 @@ final class TrackerTypeSelectionViewController: UIViewController {
     private func showNewHabitCreationScreen() {
         let newHabitCreation = NewHabitCreationViewController()
         newHabitCreation.delegate = self
+        newHabitCreation.title = "Новая привычка"
         let newHabitCreationNC = UINavigationController(rootViewController: newHabitCreation)
         present(newHabitCreationNC, animated: true, completion: nil)
     }
     
     private func showCategoryScreen() {
-//        let categoryVC = NewCategoryViewController()
-//        let navigationController = UINavigationController(rootViewController: categoryVC)
-//        present(navigationController, animated: true, completion: nil)
+        let newHabitCreation = NewHabitCreationViewController()
+        newHabitCreation.delegate = self
+        newHabitCreation.title = "Новое нерегулярное событие"
+        let newHabitCreationNC = UINavigationController(rootViewController: newHabitCreation)
+        present(newHabitCreationNC, animated: true, completion: nil)
     }
 
     

@@ -27,9 +27,5 @@ struct Tracker {
 }
 
 struct TrackerSchedule {
-//    let trackerScheduleDaysOfWeek: Set<DayOfWeek>
     let trackerScheduleDaysOfWeek: [String]
-//    let trackerScheduleStartTime: Date
-//    let trackerScheduleEndTime: Date
-
 }

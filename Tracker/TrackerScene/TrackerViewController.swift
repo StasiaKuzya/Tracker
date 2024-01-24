@@ -24,9 +24,6 @@ final class TrackerViewController: UIViewController {
     private var datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .date
-//        picker.addTarget(self,
-//                         action: #selector(datePickerValueChanged(_:)),
-//                         for: .valueChanged)
         if #available(iOS 14.0, *) {
             picker.preferredDatePickerStyle = .compact
         }
@@ -103,22 +100,6 @@ final class TrackerViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .designWhite
         
-//        let shockTracker = Tracker(
-//              trackerId: UUID(),
-//              trackerName: "Трекер 1",
-//              trackerColor: .red,
-//              trackerEmoji: "😱",
-//              trackerSchedule: TrackerSchedule(
-//                  trackerScheduleDaysOfWeek: Set(DayOfWeek.allCases),
-//                  trackerScheduleStartTime: Date(),
-//                  trackerScheduleEndTime: Date().addingTimeInterval(60 * 60 * 2)
-//              ),
-//              trackerProgress: 0
-//          )
-//          trackers.append(shockTracker)
-//          trackers.append(shockTracker)
-//          trackers.append(shockTracker)
-        
         addTBViews()
         addNCViews()
         setupViews()
@@ -187,9 +168,6 @@ final class TrackerViewController: UIViewController {
     }
     
      func updateUIForTrackers() {
-//        emptyTrackerStateLabel.isHidden = !trackers.isEmpty
-//        emptyTrackerStateImage.isHidden = !trackers.isEmpty
-         
         emptyTrackerStateLabel.isHidden = !filteredTrackers.isEmpty
         emptyTrackerStateImage.isHidden = !filteredTrackers.isEmpty
     }
@@ -207,8 +185,6 @@ final class TrackerViewController: UIViewController {
     
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
-        print("selected date \(dayOfWeekString(for: currentDate))")
-        
         updateUIForTrackersForDate()
     }
     
@@ -232,26 +208,49 @@ extension TrackerViewController: UISearchResultsUpdating {
 extension TrackerViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-//        return trackers.count
         return filteredTrackers.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         // Создать ячейку
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellTrackerCV", for: indexPath) as? TrackerCollectionViewCell else { return UICollectionViewCell() }
-        
+
         // Настроить ячейку
-        cell.prepareForReuse()
-//        if indexPath.item < trackers.count {
-//            cell.configure(with: trackers[indexPath.item])
-        if indexPath.item < filteredTrackers.count {
-             cell.configure(with: filteredTrackers[indexPath.item])
-         }
-        
+//        cell.prepareForReuse()
+        if indexPath.item <= filteredTrackers.count {
+            let tracker = filteredTrackers[indexPath.item]
+            
+            cell.delegate = self
+            let isCompletedToday = isTrackerCompletedToday(id: tracker.trackerId)
+            let completedDays = completedTrackers.filter {
+                $0.trackerID == tracker.trackerId
+            }.count
+            
+            cell.configure(
+                with: tracker,
+                completedForDate: isCompletedToday,
+                completedDays: completedDays,
+                indexPath: indexPath
+            )
+        }
+
         // Возвратить ячейку
         return cell
     }
     
+    private func isTrackerCompletedToday(id: UUID) -> Bool {
+        completedTrackers.contains { trackerRecord in
+            isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        }
+    }
+    
+    private func isSameTrackerRecord(trackerRecord: TrackerRecord, id: UUID) -> Bool {
+        let isSameDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: datePicker.date)
+        return
+        trackerRecord.trackerID  == id &&
+        isSameDay
+    }
+
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         var id: String
         switch kind {
@@ -325,11 +324,10 @@ extension TrackerViewController: UICollectionViewDelegate {
 extension TrackerViewController: TrackerVCDataDelegate {
     
     func didUpdateTracker(_ tracker: Tracker) {
-        
         trackers.append(tracker)
-//        updateUI()
-        updateUIForTrackersForDate()
-//        updateCollectionViewAnimated()
+        DispatchQueue.main.async {
+            self.updateUIForTrackersForDate()
+        }
     }
     
     func trackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController) {
@@ -342,45 +340,47 @@ extension TrackerViewController: TrackerVCDataDelegate {
             print("header \(category)")
         }
     }
-    
-    func updateUIForTrackersForDate() {
+}
+
+    // MARK: - Extension updateUIForTrackersForDate
+
+extension TrackerViewController {
+        
+    private func updateUIForTrackersForDate() {
         guard !trackers.isEmpty else {
             return
         }
+        
+        // Получить выбранный день недели из датапикера
+        let selectedDateString = dayOfWeekString(for: currentDate)
+        
+        // Фильтр трекеров по выбранному дню
         filteredTrackers = trackers.filter { tracker in
             let trackerDays = tracker.trackerSchedule.trackerScheduleDaysOfWeek
-            let selectedDateString = dayOfWeekString(for: currentDate)
             return trackerDays.contains(selectedDateString)
         }
         
-        DispatchQueue.main.async {
-            self.collectionView.reloadData()
-        }
+        // Обновление коллекцию анимированно
+        collectionView.performBatchUpdates({
+            // Индексы элементов, которые нужно удалить
+            let indicesToDelete = collectionView.indexPathsForVisibleItems.filter { indexPath in
+                let index = indexPath.item
+                return index >= filteredTrackers.count || !filteredTrackers[index].trackerSchedule.trackerScheduleDaysOfWeek.contains(selectedDateString)
+            }
+            collectionView.deleteItems(at: indicesToDelete)
+            
+            // Индексы элементов, которые нужно вставить
+            let indicesToInsert = filteredTrackers.enumerated().filter { (index, tracker) in
+                return index >= collectionView.numberOfItems(inSection: 0) || !collectionView.indexPathsForVisibleItems.contains { $0.item == index }
+            }
+            let indexPathsToInsert = indicesToInsert.map { (index, _) in IndexPath(item: index, section: 0) }
+            collectionView.insertItems(at: indexPathsToInsert)
+        }) { _ in self.updateSectionHeaderAnimated() }
+        
         updateUIForTrackers()
     }
     
-//    func updateUI() {
-//        DispatchQueue.main.async {
-//            self.updateUIForTrackers()
-//            self.updateUIForTrackersForDate()
-//        }
-//    }
-    
-//    func updateCollectionViewAnimated() {
-//
-//        let newTracker = self.filteredTrackers.count - 1
-//        let indexPath = IndexPath(row: newTracker, section: 0)
-//
-//        self.collectionView.performBatchUpdates {
-//            if !self.filteredTrackers.isEmpty {
-//                self.collectionView.insertItems(at: [indexPath])
-//            }
-//        } completion: { [weak self] _ in
-//            self?.updateSectionHeaderAnimated()
-//        }
-//    }
-    
-    func updateSectionHeaderAnimated() {
+    private func updateSectionHeaderAnimated() {
         guard let selectedCategory = selectedCategory else {
             return
         }
@@ -399,51 +399,23 @@ extension TrackerViewController: TrackerVCDataDelegate {
         }, completion: { _ in
         })
     }
+}
+
+extension TrackerViewController: TrackerCellDelegate {
+    func completeTracker(id: UUID, at indexPath: IndexPath) {
+        let trackerRecord = TrackerRecord(
+            trackerID: id,
+            date: datePicker.date)
+        completedTrackers.append(trackerRecord)
+        
+        collectionView.reloadItems(at: [indexPath])
+    }
     
-//
-//    func updateUIForTrackersForDate() {
-//            guard !trackers.isEmpty else {
-//                return
-//            }
-//
-//            // Сохраняем индексы элементов, которые нужно удалить
-//            let indicesToDelete = filteredTrackers.enumerated()
-//                .filter { (index, tracker) in
-//                    let trackerDays = tracker.trackerSchedule.trackerScheduleDaysOfWeek
-//                    let selectedDateString = dayOfWeekString(for: currentDate)
-//                    return !trackerDays.contains(selectedDateString)
-//                }
-//                .map { (index, tracker) in
-//                    return IndexPath(row: index, section: 0)
-//                }
-//
-//            // Удаляем элементы, которые не соответствуют выбранному дню
-//            collectionView.deleteItems(at: indicesToDelete)
-//
-//            // Фильтруем трекеры
-//            filteredTrackers = trackers.filter { tracker in
-//                let trackerDays = tracker.trackerSchedule.trackerScheduleDaysOfWeek
-//                let selectedDateString = dayOfWeekString(for: currentDate)
-//                return trackerDays.contains(selectedDateString)
-//            }
-//
-//            // Обновляем UI анимированно
-//            DispatchQueue.main.async {
-//                self.collectionView.performBatchUpdates({
-//                    // Вставляем новые элементы
-//                    let indicesToInsert = self.filteredTrackers.enumerated()
-//                        .filter { (index, tracker) in
-//                            return !self.collectionView.indexPathsForVisibleItems.contains { $0.item == index && $0.section == 0 }
-//                        }
-//                        .map { (index, tracker) in
-//                            return IndexPath(row: index, section: 0)
-//                        }
-//
-//                    self.collectionView.insertItems(at: indicesToInsert)
-//                }, completion: { _ in
-//                    // Завершаем обновление
-//                    self.updateSectionHeaderAnimated()
-//                })
-//            }
-//        }
+    func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
+        completedTrackers.removeAll { trackerRecord in
+            isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        }
+        
+        collectionView.reloadItems(at: [indexPath])
+    }
 }
