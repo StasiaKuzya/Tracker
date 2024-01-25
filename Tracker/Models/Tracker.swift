@@ -14,18 +14,27 @@ struct Tracker {
     let trackerColor: UIColor
     let trackerEmoji: String?
     let trackerSchedule: TrackerSchedule
-    var trackerProgress: Int
+    var creationDate: Date
     
-    init(trackerId: UUID, trackerName: String, trackerColor: UIColor, trackerEmoji: String?, trackerSchedule: TrackerSchedule, trackerProgress: Int) {
+    init(trackerId: UUID, trackerName: String, trackerColor: UIColor, trackerEmoji: String?, trackerSchedule: TrackerSchedule, creationDate: Date) {
         self.trackerId = trackerId
         self.trackerName = trackerName
         self.trackerColor = trackerColor
         self.trackerEmoji = trackerEmoji
         self.trackerSchedule = trackerSchedule
-        self.trackerProgress = trackerProgress
+        self.creationDate = creationDate
     }
+    
+//    private enum CodingKeys: String, CodingKey {
+//        case trackerId
+//        case trackerName
+//        case trackerColor
+//        case trackerEmoji
+//        case trackerSchedule
+//        case creationDate
+//    }
 }
 
-struct TrackerSchedule {
+struct TrackerSchedule: Codable {
     let trackerScheduleDaysOfWeek: [String]
 }

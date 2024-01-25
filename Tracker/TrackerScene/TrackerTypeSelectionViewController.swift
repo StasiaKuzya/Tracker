@@ -97,11 +97,11 @@ final class TrackerTypeSelectionViewController: UIViewController {
     }
     
     private func showCategoryScreen() {
-        let newHabitCreation = NewHabitCreationViewController()
-        newHabitCreation.delegate = self
-        newHabitCreation.title = "Новое нерегулярное событие"
-        let newHabitCreationNC = UINavigationController(rootViewController: newHabitCreation)
-        present(newHabitCreationNC, animated: true, completion: nil)
+        let irreguralEventVC = IrreguralEventViewController()
+        irreguralEventVC.delegate = self
+        irreguralEventVC.title = "Новое нерегулярное событие"
+        let irreguralEventNC = UINavigationController(rootViewController: irreguralEventVC)
+        present(irreguralEventNC, animated: true, completion: nil)
     }
 
     
@@ -138,6 +138,10 @@ extension TrackerTypeSelectionViewController: TrackerDataDelegate {
     }
     
     func newHabitCreationVCDismissed(_ vc: NewHabitCreationViewController) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func ireguralEventVCDismissed(_ vc: IrreguralEventViewController) {
         dismiss(animated: true, completion: nil)
     }
 }

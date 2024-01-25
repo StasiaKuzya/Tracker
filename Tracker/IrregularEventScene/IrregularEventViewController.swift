@@ -1,21 +1,15 @@
 //
-//  NewHabitCreationViewController.swift
+//  IrregularEventViewController.swift
 //  Tracker
 //
-//  Created by Анастасия on 12.01.2024.
+//  Created by Анастасия on 24.01.2024.
 //
 
 import Foundation
 import UIKit
 
-protocol TrackerDataDelegate: AnyObject {
-    func didCreateTracker(_ tracker: Tracker)
-    func selectedCategory(_ category: String)
-    func newHabitCreationVCDismissed(_ vc: NewHabitCreationViewController)
-    func ireguralEventVCDismissed(_ vc: IrreguralEventViewController)
-}
 
-final class NewHabitCreationViewController: UIViewController {
+final class IrreguralEventViewController: UIViewController {
 
     // MARK: -  Properties & Constants
     weak var delegate: TrackerDataDelegate?
@@ -23,7 +17,7 @@ final class NewHabitCreationViewController: UIViewController {
     var selectedEmoji: String?
     var selectedColor: UIColor?
     
-    private var words: [(title: String, subtitle: String?)] = [("Категория", nil), ("Расписание", nil)]
+    private var words: [(title: String, subtitle: String?)] = [("Категория", nil)]
     
     private let maxLength = 38
     
@@ -163,13 +157,10 @@ final class NewHabitCreationViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         
-//        title = "Новая привычка"
-        
         setupViews()
         tableView.reloadData()
         
         didSelectCategory(selectedCategory ?? "")
-        didSelectDays([])
     }
     
     // MARK: - Private Methods
@@ -191,7 +182,7 @@ final class NewHabitCreationViewController: UIViewController {
 
             textField.heightAnchor.constraint(equalToConstant: 75),
             tableView.widthAnchor.constraint(equalTo: stackView.widthAnchor),
-            tableView.heightAnchor.constraint(equalToConstant: 150),
+            tableView.heightAnchor.constraint(equalToConstant: 75),
             
             stackViewH.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             stackViewH.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
@@ -226,13 +217,6 @@ final class NewHabitCreationViewController: UIViewController {
         let categoryManagementNC = UINavigationController(rootViewController: categoryManagementVC)
         present(categoryManagementNC, animated: true, completion: nil)
     }
-    private func showScheduleScreen() {
-        textField.resignFirstResponder()
-        let scheduleVC = ScheduleViewController()
-        scheduleVC.scheduleDelegate = self
-        let scheduleNC = UINavigationController(rootViewController: scheduleVC)
-        present(scheduleNC, animated: true, completion: nil)
-    }
 
     @objc private func cancelButtonTapped() {
         textField.resignFirstResponder()
@@ -244,12 +228,10 @@ final class NewHabitCreationViewController: UIViewController {
 //            return
         
         if let trackerName = textField.text,
-           !trackerName.isEmpty,
            let selectedEmoji = selectedEmoji,
            let selectedColor = selectedColor,
            let selectedCategory = selectedCategory,
-           !selectedDays.isEmpty
-        {
+           !trackerName.isEmpty {
             
             creationButton.isEnabled = true
             creationButton.backgroundColor = .designBlack
@@ -267,7 +249,7 @@ final class NewHabitCreationViewController: UIViewController {
             
             delegate?.didCreateTracker(tracker)
             delegate?.selectedCategory(selectedCategory)
-            delegate?.newHabitCreationVCDismissed(self)
+            delegate?.ireguralEventVCDismissed(self)
             
         } else {
             
@@ -283,7 +265,7 @@ final class NewHabitCreationViewController: UIViewController {
 
     // MARK: - UITableViewDataSource
 
-extension NewHabitCreationViewController: UITableViewDataSource {
+extension IrreguralEventViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return words.count
     }
@@ -323,16 +305,14 @@ extension NewHabitCreationViewController: UITableViewDataSource {
 
     // MARK: - UITableViewDelegate
 
-extension NewHabitCreationViewController: UITableViewDelegate {
+extension IrreguralEventViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        
+
         switch indexPath.section {
         case 0:
             showCategoryScreen()
-        case 1:
-            showScheduleScreen()
         default:
             break
         }
@@ -344,7 +324,7 @@ extension NewHabitCreationViewController: UITableViewDelegate {
 }
     // MARK: - UITextFieldDelegate
 
-extension NewHabitCreationViewController: UITextFieldDelegate {
+extension IrreguralEventViewController: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         textField.textColor = .designBlack
         updateCreationButtonColor()
@@ -355,8 +335,7 @@ extension NewHabitCreationViewController: UITextFieldDelegate {
            !trackerName.isEmpty,
            let _ = selectedEmoji,
            let _ = selectedColor,
-           let _ = selectedCategory,
-           !selectedDays.isEmpty {
+           let _ = selectedCategory {
             creationButton.isEnabled = true
             creationButton.backgroundColor = .designBlack
         } else {
@@ -368,7 +347,7 @@ extension NewHabitCreationViewController: UITextFieldDelegate {
 
     // MARK: - CategorySelectionDelegate
 
-extension NewHabitCreationViewController: CategorySelectionDelegate {
+extension IrreguralEventViewController: CategorySelectionDelegate {
     func didSelectCategory(_ category: String) {
         selectedCategory = category
         words[0].subtitle = selectedCategory
@@ -383,28 +362,9 @@ extension NewHabitCreationViewController: CategorySelectionDelegate {
     }
 }
 
-    // MARK: - ScheduleSelectionDelegate
-
-extension NewHabitCreationViewController: ScheduleSelectionDelegate {
-    func didSelectDays(_ days: [String]) {
-        selectedDays = days
-        if days.count == 7 {
-            words[1].subtitle = "Каждый день"
-        } else {
-            words[1].subtitle = days.joined(separator: ", ")
-        }
-        tableView.reloadData()
-        
-        updateCreationButtonColor()
-    }
-    
-    func scheduleVCDismissed(_ vc: ScheduleViewController) {
-        dismiss(animated: true, completion: nil)
-    }
-}
     // MARK: - UICollectionViewDataSource
 
-extension NewHabitCreationViewController: UICollectionViewDataSource {
+extension IrreguralEventViewController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return collectionView == self.collectionView ? 2 : 1
@@ -467,7 +427,7 @@ extension NewHabitCreationViewController: UICollectionViewDataSource {
 
     // MARK: - UICollectionViewDelegateFlowLayout
 
-extension NewHabitCreationViewController: UICollectionViewDelegateFlowLayout {
+extension IrreguralEventViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         
         let indexPath = IndexPath(row: 0, section: section)
@@ -498,9 +458,9 @@ extension NewHabitCreationViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
-    // MARK: - NewHabitCreationViewController
+    // MARK: - IrreguralEventViewController
 
-extension NewHabitCreationViewController: UICollectionViewDelegate {
+extension IrreguralEventViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let cell = collectionView.cellForItem(at: indexPath) as? ColorEmojiCollectionViewCell else {
             return

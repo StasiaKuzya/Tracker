@@ -115,7 +115,6 @@ final class CategoryManagementViewController: UIViewController {
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             tableView.heightAnchor.constraint(equalToConstant: 75 * CGFloat(categories.count)),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100),
 
             emptyTrackerStateStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             emptyTrackerStateStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -(60 + 16) / 2),
@@ -183,7 +182,10 @@ extension CategoryManagementViewController: UITableViewDelegate {
         let selectedCategory = categories[indexPath.row]
         categorySelectionDelegate?.didSelectCategory(selectedCategory.title)
         categorySelectionDelegate?.categoryManagementVCDismissed(self)
-//        dismiss(animated: true, completion: nil)
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 75.0
     }
 }
     // MARK: - NewCategoryDelegate

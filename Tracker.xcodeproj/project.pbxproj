@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A1994D02B61ACC200024477 /* IrregularEventViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1994CF2B61ACC200024477 /* IrregularEventViewController.swift */; };
 		5A6DA0CF2B46F800008A2111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6DA0CE2B46F800008A2111 /* AppDelegate.swift */; };
 		5A6DA0D12B46F800008A2111 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6DA0D02B46F800008A2111 /* SceneDelegate.swift */; };
 		5A6DA0D32B46F800008A2111 /* TrackerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6DA0D22B46F800008A2111 /* TrackerViewController.swift */; };
@@ -35,6 +36,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5A1994CF2B61ACC200024477 /* IrregularEventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IrregularEventViewController.swift; sourceTree = "<group>"; };
 		5A6DA0CB2B46F800008A2111 /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A6DA0CE2B46F800008A2111 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5A6DA0D02B46F800008A2111 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -75,6 +77,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5A1994CE2B61AC2700024477 /* IrregularEventScene */ = {
+			isa = PBXGroup;
+			children = (
+				5A1994CF2B61ACC200024477 /* IrregularEventViewController.swift */,
+			);
+			path = IrregularEventScene;
+			sourceTree = "<group>";
+		};
 		5A6DA0C22B46F800008A2111 = {
 			isa = PBXGroup;
 			children = (
@@ -97,6 +107,7 @@
 				5AFE63B02B4BF0DA0076EC5E /* Models */,
 				5A6DA0E22B47039A008A2111 /* TabBar */,
 				5A6DA0E52B470448008A2111 /* TrackerScene */,
+				5A1994CE2B61AC2700024477 /* IrregularEventScene */,
 				5AFE63C62B530ED60076EC5E /* HabitScene */,
 				5AFE63C52B530E7E0076EC5E /* CategoryScene */,
 				5AFE63C72B53FBFB0076EC5E /* ScheduleScene */,
@@ -281,6 +292,7 @@
 				5A6DA0EE2B47107D008A2111 /* SplashViewController.swift in Sources */,
 				5A6DA0D12B46F800008A2111 /* SceneDelegate.swift in Sources */,
 				5AFE63C42B52E8840076EC5E /* CategoryTableViewCell.swift in Sources */,
+				5A1994D02B61ACC200024477 /* IrregularEventViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -15,7 +15,7 @@ final class TrackerViewController: UIViewController {
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru_RU")
-        formatter.dateFormat = "DD.MM.YY"
+        formatter.dateFormat = "dd.MM.yy"
         return formatter
     }()
     
@@ -226,6 +226,15 @@ extension TrackerViewController: UICollectionViewDataSource {
                 $0.trackerID == tracker.trackerId
             }.count
             
+            if  datePicker.date > Date() {
+                cell.button.isEnabled = false
+                cell.button.isHidden = true
+                
+            } else {
+                cell.button.isEnabled = true
+                cell.button.isHidden = false
+            }
+            
             cell.configure(
                 with: tracker,
                 completedForDate: isCompletedToday,
@@ -246,9 +255,7 @@ extension TrackerViewController: UICollectionViewDataSource {
     
     private func isSameTrackerRecord(trackerRecord: TrackerRecord, id: UUID) -> Bool {
         let isSameDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: datePicker.date)
-        return
-        trackerRecord.trackerID  == id &&
-        isSameDay
+        return trackerRecord.trackerID  == id && isSameDay
     }
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -325,6 +332,7 @@ extension TrackerViewController: TrackerVCDataDelegate {
     
     func didUpdateTracker(_ tracker: Tracker) {
         trackers.append(tracker)
+//        saveTrackers()
         DispatchQueue.main.async {
             self.updateUIForTrackersForDate()
         }
@@ -340,6 +348,20 @@ extension TrackerViewController: TrackerVCDataDelegate {
             print("header \(category)")
         }
     }
+    
+//    private func saveTrackers() {
+//        let encoder = JSONEncoder()
+//        if let encoded = try? encoder.encode(trackers) {
+//            UserDefaults.standard.set(encoded, forKey: "trackers")
+//        }
+//    }
+//
+//    private func loadTrackers() {
+//        if let data = UserDefaults.standard.data(forKey: "trackers"),
+//           let decoded = try? JSONDecoder().decode([Tracker].self, from: data) {
+//            trackers = decoded
+//        }
+//    }
 }
 
     // MARK: - Extension updateUIForTrackersForDate
@@ -351,31 +373,35 @@ extension TrackerViewController {
             return
         }
         
-        // Получить выбранный день недели из датапикера
-        let selectedDateString = dayOfWeekString(for: currentDate)
+        // Получить выбранную дату из датапикера
+        let selectedDate = datePicker.date
         
         // Фильтр трекеров по выбранному дню
         filteredTrackers = trackers.filter { tracker in
-            let trackerDays = tracker.trackerSchedule.trackerScheduleDaysOfWeek
-            return trackerDays.contains(selectedDateString)
+            if tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty {
+                // Если у трекера нет расписания, проверяем, что дата создания соответствует выбранной дате
+                return Calendar.current.isDate(tracker.creationDate, inSameDayAs: selectedDate)
+            } else {
+                // Если у трекера есть расписание, проверяем соответствие дня недели выбранной дате
+                let selectedDateString = dayOfWeekString(for: selectedDate)
+                return tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains(selectedDateString)
+            }
         }
         
-        // Обновление коллекцию анимированно
+        // Обновление коллекции анимированно
         collectionView.performBatchUpdates({
-            // Индексы элементов, которые нужно удалить
-            let indicesToDelete = collectionView.indexPathsForVisibleItems.filter { indexPath in
-                let index = indexPath.item
-                return index >= filteredTrackers.count || !filteredTrackers[index].trackerSchedule.trackerScheduleDaysOfWeek.contains(selectedDateString)
-            }
+            // Удалить все элементы из секции
+            let indicesToDelete = (0..<collectionView.numberOfItems(inSection: 0)).map { IndexPath(item: $0, section: 0) }
             collectionView.deleteItems(at: indicesToDelete)
             
-            // Индексы элементов, которые нужно вставить
-            let indicesToInsert = filteredTrackers.enumerated().filter { (index, tracker) in
-                return index >= collectionView.numberOfItems(inSection: 0) || !collectionView.indexPathsForVisibleItems.contains { $0.item == index }
+            // Если есть фильтрованные трекеры, добавить их обратно
+            if !filteredTrackers.isEmpty {
+                let indicesToInsert = (0..<filteredTrackers.count).map { IndexPath(item: $0, section: 0) }
+                collectionView.insertItems(at: indicesToInsert)
             }
-            let indexPathsToInsert = indicesToInsert.map { (index, _) in IndexPath(item: index, section: 0) }
-            collectionView.insertItems(at: indexPathsToInsert)
-        }) { _ in self.updateSectionHeaderAnimated() }
+        }) { _ in
+            self.updateSectionHeaderAnimated()
+        }
         
         updateUIForTrackers()
     }
