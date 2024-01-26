@@ -10,7 +10,6 @@ import UIKit
 
 protocol TrackerDataDelegate: AnyObject {
     func didCreateTracker(_ tracker: Tracker)
-    func selectedCategory(_ category: String)
     func newHabitCreationVCDismissed(_ vc: NewHabitCreationViewController)
     func ireguralEventVCDismissed(_ vc: IrreguralEventViewController)
 }
@@ -27,7 +26,7 @@ final class NewHabitCreationViewController: UIViewController {
     
     private let maxLength = 38
     
-    private var selectedCategory: String?
+    private var selectedCategoryString: String?
     
     private let emojies = [
         "🙂", "😻", "🌺", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪"
@@ -163,12 +162,9 @@ final class NewHabitCreationViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         
-//        title = "Новая привычка"
-        
         setupViews()
         tableView.reloadData()
         
-        didSelectCategory(selectedCategory ?? "")
         didSelectDays([])
     }
     
@@ -247,7 +243,7 @@ final class NewHabitCreationViewController: UIViewController {
            !trackerName.isEmpty,
            let selectedEmoji = selectedEmoji,
            let selectedColor = selectedColor,
-           let selectedCategory = selectedCategory,
+           let selectedCategoryString = selectedCategoryString,
            !selectedDays.isEmpty
         {
             
@@ -262,11 +258,10 @@ final class NewHabitCreationViewController: UIViewController {
                 trackerEmoji: selectedEmoji,
                 trackerSchedule: TrackerSchedule(
                     trackerScheduleDaysOfWeek: selectedDays),
-                creationDate: Date()
+                category: selectedCategoryString
             )
             
             delegate?.didCreateTracker(tracker)
-            delegate?.selectedCategory(selectedCategory)
             delegate?.newHabitCreationVCDismissed(self)
             
         } else {
@@ -274,10 +269,6 @@ final class NewHabitCreationViewController: UIViewController {
             creationButton.isEnabled = false
             creationButton.backgroundColor = .designGray
         }
-    }
-    
-    private func createTapped() {
-        
     }
 }
 
@@ -355,7 +346,7 @@ extension NewHabitCreationViewController: UITextFieldDelegate {
            !trackerName.isEmpty,
            let _ = selectedEmoji,
            let _ = selectedColor,
-           let _ = selectedCategory,
+           let _ = selectedCategoryString,
            !selectedDays.isEmpty {
             creationButton.isEnabled = true
             creationButton.backgroundColor = .designBlack
@@ -369,10 +360,10 @@ extension NewHabitCreationViewController: UITextFieldDelegate {
     // MARK: - CategorySelectionDelegate
 
 extension NewHabitCreationViewController: CategorySelectionDelegate {
-    func didSelectCategory(_ category: String) {
-        selectedCategory = category
-        words[0].subtitle = selectedCategory
-        print("categ \(category)")
+    
+    func didSelectCategory(_ category: TrackerCategory) {
+        selectedCategoryString = category.title
+        words[0].subtitle = selectedCategoryString
         tableView.reloadData()
         
         updateCreationButtonColor()

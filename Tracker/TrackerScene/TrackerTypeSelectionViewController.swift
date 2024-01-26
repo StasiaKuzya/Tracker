@@ -10,7 +10,6 @@ import UIKit
 
 protocol TrackerVCDataDelegate: AnyObject {
     func didUpdateTracker(_ tracker: Tracker)
-    func selectedCategory(_ category: String)
     func trackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController)
 }
 
@@ -122,19 +121,8 @@ final class TrackerTypeSelectionViewController: UIViewController {
 extension TrackerTypeSelectionViewController: TrackerDataDelegate {
     
     func didCreateTracker(_ tracker: Tracker) {
-        // Создать новый трекер с переданным именем
-        trackerVC.trackers.append(tracker)
-        
-        // Обновить UI для отображения нового трекера
-        trackerVC.updateUIForTrackers()
-        
-        // Обновить коллекцию
         delegate?.didUpdateTracker(tracker)
         delegate?.trackerTypeSelectionVCDismissed(self)
-    }
-    
-    func selectedCategory(_ category: String) {
-        delegate?.selectedCategory(category)
     }
     
     func newHabitCreationVCDismissed(_ vc: NewHabitCreationViewController) {

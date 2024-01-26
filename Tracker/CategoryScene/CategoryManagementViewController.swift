@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 protocol CategorySelectionDelegate: AnyObject {
-    func didSelectCategory(_ category: String)
+    func didSelectCategory(_ category: TrackerCategory)
     func categoryManagementVCDismissed(_ vc: CategoryManagementViewController)
 }
 
@@ -88,7 +88,6 @@ final class CategoryManagementViewController: UIViewController {
         
         setupViews()
         loadCategories()
-        print("count cat \(categories.count) и \(String(describing: tableCount))")
     }
     
     // MARK: - Private Methods
@@ -103,18 +102,13 @@ final class CategoryManagementViewController: UIViewController {
         
         tableView.layer.masksToBounds = true
         tableView.layer.cornerRadius = 16
-//        tableView.layer.borderWidth = 1
-//        tableView.layer.borderColor = UIColor.black.cgColor
-        tableView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner, .layerMaxXMinYCorner]
-        
-        tableView.rowHeight = 75
-        tableCount = CGFloat(categories.count)
+        tableView.layer.borderWidth = 1
+        tableView.layer.borderColor = UIColor.designWhite.cgColor
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            tableView.heightAnchor.constraint(equalToConstant: 75 * CGFloat(categories.count)),
 
             emptyTrackerStateStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             emptyTrackerStateStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -(60 + 16) / 2),
@@ -137,12 +131,19 @@ final class CategoryManagementViewController: UIViewController {
 
         if categories.isEmpty {
             emptyTrackerStateStackView.isHidden = false
-            print("empty")
         } else {
             tableView.isHidden = false
+            dinamicHeightOfTable()
             tableView.reloadData()
-            print("full")
         }
+    }
+    
+    private func dinamicHeightOfTable() {
+        tableView.rowHeight = 75
+        tableCount = CGFloat(categories.count)
+        NSLayoutConstraint.activate([
+            tableView.heightAnchor.constraint(greaterThanOrEqualToConstant: 75 * CGFloat(categories.count)),
+        ])
     }
 
     @objc private func addCategoryButtonTapped() {
@@ -170,6 +171,7 @@ extension CategoryManagementViewController: UITableViewDataSource {
         return cell
     }
 }
+
     // MARK: - UITableViewDelegate
 
 extension CategoryManagementViewController: UITableViewDelegate {
@@ -180,14 +182,11 @@ extension CategoryManagementViewController: UITableViewDelegate {
         }
         
         let selectedCategory = categories[indexPath.row]
-        categorySelectionDelegate?.didSelectCategory(selectedCategory.title)
+        categorySelectionDelegate?.didSelectCategory(selectedCategory)
         categorySelectionDelegate?.categoryManagementVCDismissed(self)
     }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75.0
-    }
 }
+
     // MARK: - NewCategoryDelegate
 
 extension CategoryManagementViewController: NewCategoryDelegate {
@@ -195,7 +194,6 @@ extension CategoryManagementViewController: NewCategoryDelegate {
         categories.append(category)
         loadCategories()
         emptyTrackerStateStackView.isHidden = true
-        print("cat count1 \(categories.count)")
     }
     
     func newCategoryVCDidCancel(_ vc: NewCategoryViewController) {

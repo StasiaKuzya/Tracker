@@ -21,7 +21,7 @@ final class IrreguralEventViewController: UIViewController {
     
     private let maxLength = 38
     
-    private var selectedCategory: String?
+    private var selectedCategoryString: String?
     
     private let emojies = [
         "🙂", "😻", "🌺", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪"
@@ -159,8 +159,6 @@ final class IrreguralEventViewController: UIViewController {
         
         setupViews()
         tableView.reloadData()
-        
-        didSelectCategory(selectedCategory ?? "")
     }
     
     // MARK: - Private Methods
@@ -230,7 +228,7 @@ final class IrreguralEventViewController: UIViewController {
         if let trackerName = textField.text,
            let selectedEmoji = selectedEmoji,
            let selectedColor = selectedColor,
-           let selectedCategory = selectedCategory,
+           let selectedCategoryString = selectedCategoryString,
            !trackerName.isEmpty {
             
             creationButton.isEnabled = true
@@ -244,11 +242,10 @@ final class IrreguralEventViewController: UIViewController {
                 trackerEmoji: selectedEmoji,
                 trackerSchedule: TrackerSchedule(
                     trackerScheduleDaysOfWeek: selectedDays),
-                creationDate: Date()
+                category: selectedCategoryString
             )
             
             delegate?.didCreateTracker(tracker)
-            delegate?.selectedCategory(selectedCategory)
             delegate?.ireguralEventVCDismissed(self)
             
         } else {
@@ -335,7 +332,7 @@ extension IrreguralEventViewController: UITextFieldDelegate {
            !trackerName.isEmpty,
            let _ = selectedEmoji,
            let _ = selectedColor,
-           let _ = selectedCategory {
+           let _ = selectedCategoryString {
             creationButton.isEnabled = true
             creationButton.backgroundColor = .designBlack
         } else {
@@ -348,10 +345,10 @@ extension IrreguralEventViewController: UITextFieldDelegate {
     // MARK: - CategorySelectionDelegate
 
 extension IrreguralEventViewController: CategorySelectionDelegate {
-    func didSelectCategory(_ category: String) {
-        selectedCategory = category
-        words[0].subtitle = selectedCategory
-        print("categ \(category)")
+    
+    func didSelectCategory(_ category: TrackerCategory) {
+        selectedCategoryString = category.title
+        words[0].subtitle = selectedCategoryString
         tableView.reloadData()
         
         updateCreationButtonColor()

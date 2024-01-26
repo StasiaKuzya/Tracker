@@ -60,18 +60,11 @@ final class TrackerViewController: UIViewController {
     
     // TODO:
    var trackers: [Tracker] = []
-//    {
-//        didSet {
-//            updateUIForTrackers()
-//        }
-//    }
-    private var filteredTrackers: [Tracker] = []
-//    private var filteredTrackers = [Tracker]()
 
     private var categories: [TrackerCategory] = []
+    private var visibleCategories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
-    var selectedCategory: String?
-    
+//    var selectedCategory: String?
     private var currentDate: Date = Date()
     
     let params = GeometricParams(cellCount: 2,
@@ -168,8 +161,8 @@ final class TrackerViewController: UIViewController {
     }
     
      func updateUIForTrackers() {
-        emptyTrackerStateLabel.isHidden = !filteredTrackers.isEmpty
-        emptyTrackerStateImage.isHidden = !filteredTrackers.isEmpty
+        emptyTrackerStateLabel.isHidden = !categories.isEmpty
+        emptyTrackerStateImage.isHidden = !categories.isEmpty
     }
         
     private func dayOfWeekString(for date: Date) -> String {
@@ -185,7 +178,18 @@ final class TrackerViewController: UIViewController {
     
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
-        updateUIForTrackersForDate()
+        visibleCategories = categories
+        collectionView.reloadData()
+        
+//        let calendar = Calendar.current
+//        let weekday = Calendar.component(.weekday, from: datePicker.date)
+//        visibleCategories = categories.map{ category in
+//            TrackerCategory(
+//                title: category.title,
+//                trackers: category.trackers.filter{ tracker in
+//                    tracker.trackerSchedule?.trackerScheduleDaysOfWeek.contains(weekday)
+//                })
+//        }
     }
     
     private func showTrackerTypeSelectionScreen() {
@@ -208,17 +212,21 @@ extension TrackerViewController: UISearchResultsUpdating {
 extension TrackerViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return filteredTrackers.count
+        guard section < categories.count else { return 0 }
+        return categories[section].trackers.count
     }
-
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        print("checking2 \(categories.count)")
+        return categories.count
+    }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         // Создать ячейку
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellTrackerCV", for: indexPath) as? TrackerCollectionViewCell else { return UICollectionViewCell() }
 
         // Настроить ячейку
-//        cell.prepareForReuse()
-        if indexPath.item <= filteredTrackers.count {
-            let tracker = filteredTrackers[indexPath.item]
+        let tracker = categories[indexPath.section].trackers[indexPath.item]
             
             cell.delegate = self
             let isCompletedToday = isTrackerCompletedToday(id: tracker.trackerId)
@@ -241,7 +249,6 @@ extension TrackerViewController: UICollectionViewDataSource {
                 completedDays: completedDays,
                 indexPath: indexPath
             )
-        }
 
         // Возвратить ячейку
         return cell
@@ -272,10 +279,8 @@ extension TrackerViewController: UICollectionViewDataSource {
         guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as? SupplementaryTrackerView else {
             fatalError("Failed to dequeue SupplementaryTrackerView")
         }
-        
-        view.isHidden = filteredTrackers.isEmpty
-        view.titleLabel.text = selectedCategory
-        print("header name \(String(describing: selectedCategory))")
+        view.isHidden = trackers.isEmpty
+        view.titleLabel.text = categories[indexPath.section].title
         
         return view
     }
@@ -331,102 +336,35 @@ extension TrackerViewController: UICollectionViewDelegate {
 extension TrackerViewController: TrackerVCDataDelegate {
     
     func didUpdateTracker(_ tracker: Tracker) {
-        trackers.append(tracker)
-//        saveTrackers()
-        DispatchQueue.main.async {
-            self.updateUIForTrackersForDate()
+
+        if let existingCategoryIndex = categories.firstIndex(where: { $0.title == tracker.category }) {
+            // Категория уже существует, добавляем трекер в существующую категорию
+            categories[existingCategoryIndex].trackers.append(tracker)
+        } else {
+            // Категории не существует, создаем новую категорию и добавляем трекер
+            let categoryTracker = TrackerCategory(
+                title: tracker.category,
+                trackers: [tracker]
+            )
+            categories.append(categoryTracker)
         }
+        // Добавляем трекер к общему массиву
+        trackers.append(tracker)
+
+        // Обновляем UI
+        collectionView.reloadData()
+        updateUIForTrackers()
     }
     
     func trackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController) {
         dismiss(animated: true, completion: nil)
     }
-    
-    func selectedCategory(_ category: String) {
-        DispatchQueue.main.async {
-            self.selectedCategory = category
-            print("header \(category)")
-        }
-    }
-    
-//    private func saveTrackers() {
-//        let encoder = JSONEncoder()
-//        if let encoded = try? encoder.encode(trackers) {
-//            UserDefaults.standard.set(encoded, forKey: "trackers")
-//        }
-//    }
-//
-//    private func loadTrackers() {
-//        if let data = UserDefaults.standard.data(forKey: "trackers"),
-//           let decoded = try? JSONDecoder().decode([Tracker].self, from: data) {
-//            trackers = decoded
-//        }
-//    }
 }
 
     // MARK: - Extension updateUIForTrackersForDate
 
 extension TrackerViewController {
-        
-    private func updateUIForTrackersForDate() {
-        guard !trackers.isEmpty else {
-            return
-        }
-        
-        // Получить выбранную дату из датапикера
-        let selectedDate = datePicker.date
-        
-        // Фильтр трекеров по выбранному дню
-        filteredTrackers = trackers.filter { tracker in
-            if tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty {
-                // Если у трекера нет расписания, проверяем, что дата создания соответствует выбранной дате
-                return Calendar.current.isDate(tracker.creationDate, inSameDayAs: selectedDate)
-            } else {
-                // Если у трекера есть расписание, проверяем соответствие дня недели выбранной дате
-                let selectedDateString = dayOfWeekString(for: selectedDate)
-                return tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains(selectedDateString)
-            }
-        }
-        
-        // Обновление коллекции анимированно
-        collectionView.performBatchUpdates({
-            // Удалить все элементы из секции
-            let indicesToDelete = (0..<collectionView.numberOfItems(inSection: 0)).map { IndexPath(item: $0, section: 0) }
-            collectionView.deleteItems(at: indicesToDelete)
-            
-            // Если есть фильтрованные трекеры, добавить их обратно
-            if !filteredTrackers.isEmpty {
-                let indicesToInsert = (0..<filteredTrackers.count).map { IndexPath(item: $0, section: 0) }
-                collectionView.insertItems(at: indicesToInsert)
-            }
-        }) { _ in
-            self.updateSectionHeaderAnimated()
-        }
-        
-        updateUIForTrackers()
-    }
-    
-    private func updateSectionHeaderAnimated() {
-        guard let selectedCategory = selectedCategory else {
-            return
-        }
-        let newTrackerCategory = TrackerCategory(title: selectedCategory, trackers: filteredTrackers)
-        
-        categories.append(newTrackerCategory)
-        
-        let sectionIndex = 0
-        
-        collectionView.performBatchUpdates({
-            let newTracker = self.filteredTrackers.count - 1
-            let indexPath = IndexPath(row: newTracker, section: sectionIndex)
-            self.collectionView.insertItems(at: [indexPath])
-            
-            self.collectionView.reloadSections(IndexSet(integer: sectionIndex))
-        }, completion: { _ in
-        })
-    }
 }
-
 extension TrackerViewController: TrackerCellDelegate {
     func completeTracker(id: UUID, at indexPath: IndexPath) {
         let trackerRecord = TrackerRecord(

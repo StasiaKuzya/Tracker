@@ -162,7 +162,5 @@ extension ScheduleViewController: UITableViewDelegate {
             saveButton.backgroundColor = .designBlack
             saveButton.isEnabled = true
         }
-        print("selected days \(selectedDays)")
-        print("selected days \(selectedDays.isEmpty)")
     }
 }
