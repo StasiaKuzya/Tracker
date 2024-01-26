@@ -19,7 +19,13 @@ final class TrackerViewController: UIViewController {
         return formatter
     }()
     
-    private let searchController = UISearchController(searchResultsController: nil)
+    private lazy var searchController: UISearchController = {
+        let searchController = UISearchController()
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Поиск"
+        return searchController
+    }()
 
     private var datePicker: UIDatePicker = {
         let picker = UIDatePicker()
@@ -59,18 +65,16 @@ final class TrackerViewController: UIViewController {
     }()
     
     // TODO:
-   var trackers: [Tracker] = []
-
+    private var trackers: [Tracker] = []
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
-//    var selectedCategory: String?
     private var currentDate: Date = Date()
     
     let params = GeometricParams(cellCount: 2,
                                  leftInset: 16,
                                  rightInset: 16,
-                                 cellSpacing: 7)
+                                 cellSpacing: 9)
 
     private var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -96,7 +100,7 @@ final class TrackerViewController: UIViewController {
         addTBViews()
         addNCViews()
         setupViews()
-        updateUIForTrackers()
+        updateTrackersForDate()
     }
     
     // MARK: -  Private Methods
@@ -118,7 +122,7 @@ final class TrackerViewController: UIViewController {
             navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
             datePicker.addTarget(
                 self,
-                action: #selector(datePickerValueChanged(_:)),
+                action: #selector(datePickerValueChanged),
                 for: .valueChanged)
             
             navigationController.navigationBar.prefersLargeTitles = true
@@ -128,10 +132,6 @@ final class TrackerViewController: UIViewController {
                    .foregroundColor: UIColor.designBlack,
                    .font: UIFont.systemFont(ofSize: 34, weight: .bold)
                ]
-            
-            searchController.searchResultsUpdater = self
-            searchController.obscuresBackgroundDuringPresentation = false
-            searchController.searchBar.placeholder = "Поиск"
         
             navigationItem.searchController = searchController
             navigationItem.hidesSearchBarWhenScrolling = false
@@ -160,36 +160,12 @@ final class TrackerViewController: UIViewController {
         collectionView.register(SupplementaryTrackerView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "footer")
     }
     
-     func updateUIForTrackers() {
-        emptyTrackerStateLabel.isHidden = !categories.isEmpty
-        emptyTrackerStateImage.isHidden = !categories.isEmpty
-    }
-        
-    private func dayOfWeekString(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "E"
-        formatter.locale = Locale(identifier: "ru_RU")
-        return formatter.string(from: date).capitalized
-    }
-    
     @objc private func addTrackerButtonTapped() {
         showTrackerTypeSelectionScreen()
     }
     
-    @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
-        currentDate = sender.date
-        visibleCategories = categories
-        collectionView.reloadData()
-        
-//        let calendar = Calendar.current
-//        let weekday = Calendar.component(.weekday, from: datePicker.date)
-//        visibleCategories = categories.map{ category in
-//            TrackerCategory(
-//                title: category.title,
-//                trackers: category.trackers.filter{ tracker in
-//                    tracker.trackerSchedule?.trackerScheduleDaysOfWeek.contains(weekday)
-//                })
-//        }
+    @objc private func datePickerValueChanged() {
+        updateTrackersForDate()
     }
     
     private func showTrackerTypeSelectionScreen() {
@@ -212,8 +188,8 @@ extension TrackerViewController: UISearchResultsUpdating {
 extension TrackerViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard section < categories.count else { return 0 }
-        return categories[section].trackers.count
+        guard section < visibleCategories.count else { return 0 }
+        return visibleCategories[section].trackers.count
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -226,7 +202,7 @@ extension TrackerViewController: UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellTrackerCV", for: indexPath) as? TrackerCollectionViewCell else { return UICollectionViewCell() }
 
         // Настроить ячейку
-        let tracker = categories[indexPath.section].trackers[indexPath.item]
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
             
             cell.delegate = self
             let isCompletedToday = isTrackerCompletedToday(id: tracker.trackerId)
@@ -279,9 +255,13 @@ extension TrackerViewController: UICollectionViewDataSource {
         guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as? SupplementaryTrackerView else {
             fatalError("Failed to dequeue SupplementaryTrackerView")
         }
-        view.isHidden = trackers.isEmpty
-        view.titleLabel.text = categories[indexPath.section].title
-        
+
+        if indexPath.section < visibleCategories.count {
+            view.titleLabel.text = visibleCategories[indexPath.section].title
+        } else {
+            view.titleLabel.text = ""
+        }
+
         return view
     }
 }
@@ -349,11 +329,11 @@ extension TrackerViewController: TrackerVCDataDelegate {
             categories.append(categoryTracker)
         }
         // Добавляем трекер к общему массиву
+        updateTrackersForDate()
         trackers.append(tracker)
 
         // Обновляем UI
         collectionView.reloadData()
-        updateUIForTrackers()
     }
     
     func trackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController) {
@@ -361,10 +341,54 @@ extension TrackerViewController: TrackerVCDataDelegate {
     }
 }
 
-    // MARK: - Extension updateUIForTrackersForDate
+    // MARK: - Extension updateTrackersForDate()
 
 extension TrackerViewController {
+    
+    private func updateTrackersForDate() {
+        currentDate = datePicker.date
+        let selectedDayString = dayOfWeekString(for: currentDate)
+        
+        visibleCategories = categories.compactMap { category in
+            let tracker = category.trackers.filter { tracker in
+                guard !tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty else {
+                    return true
+                }
+                return tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains(selectedDayString)
+            }
+            if tracker.isEmpty {
+                return nil
+            }
+            
+            return TrackerCategory(
+                title: category.title,
+                trackers: tracker
+            )
+        }
+        
+        let containTrackers = visibleCategories.contains { category in
+            return !category.trackers.isEmpty
+        }
+        
+        updateUIForTrackers(containTrackers)
+        collectionView.reloadData()
+    }
+    
+    private func updateUIForTrackers(_ containTrackers: Bool) {
+        emptyTrackerStateLabel.isHidden = containTrackers
+        emptyTrackerStateImage.isHidden = containTrackers
+    }
+    
+    private func dayOfWeekString(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "E"
+        formatter.locale = Locale(identifier: "ru_RU")
+        return formatter.string(from: date)
+    }
 }
+
+// MARK: - Extension TrackerCellDelegate
+
 extension TrackerViewController: TrackerCellDelegate {
     func completeTracker(id: UUID, at indexPath: IndexPath) {
         let trackerRecord = TrackerRecord(

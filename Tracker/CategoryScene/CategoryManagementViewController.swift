@@ -85,6 +85,10 @@ final class CategoryManagementViewController: UIViewController {
             title: "Важное",
             trackers: [])
         categories.append(mockCategory)
+        let mockCategor2 = TrackerCategory(
+            title: "Неважное",
+            trackers: [])
+        categories.append(mockCategor2)
         
         setupViews()
         loadCategories()
