@@ -19,12 +19,16 @@ final class TrackerViewController: UIViewController {
         return formatter
     }()
     
-    private lazy var searchController: UISearchController = {
-        let searchController = UISearchController()
-        searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Поиск"
-        return searchController
+    private lazy var searchTextField: UISearchTextField = {
+        let textField = UISearchTextField()
+        textField.placeholder = "Поиск"
+        textField.backgroundColor = .designBackground
+        textField.textColor = .designBlack
+        textField.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+        textField.autocapitalizationType = .none
+        textField.delegate = self
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        return textField
     }()
 
     private var datePicker: UIDatePicker = {
@@ -57,6 +61,33 @@ final class TrackerViewController: UIViewController {
     private let emptyTrackerStateLabel: UILabel = {
         let label = UILabel()
         label.text = "Что будем отслеживать?"
+        label.textAlignment = .center
+        label.textColor = .designBlack
+        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var wrongTextSearchStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [wrongTextSearchStackViewImage, ewrongTextSearchStackViewLabel])
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.spacing = 8
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    private let wrongTextSearchStackViewImage: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "TextFieldPlaceholder")
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    private let ewrongTextSearchStackViewLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Ничего не найдено?"
         label.textAlignment = .center
         label.textColor = .designBlack
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -132,9 +163,6 @@ final class TrackerViewController: UIViewController {
                    .foregroundColor: UIColor.designBlack,
                    .font: UIFont.systemFont(ofSize: 34, weight: .bold)
                ]
-        
-            navigationItem.searchController = searchController
-            navigationItem.hidesSearchBarWhenScrolling = false
         }
     }
     
@@ -143,10 +171,22 @@ final class TrackerViewController: UIViewController {
         emptyTrackerStateStackView.addArrangedSubview(emptyTrackerStateLabel)
         view.addSubview(collectionView)
         view.addSubview(emptyTrackerStateStackView)
+        view.addSubview(wrongTextSearchStackView)
+        view.addSubview(searchTextField)
+        
         NSLayoutConstraint.activate([
+            searchTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 7),
+            searchTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            searchTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            searchTextField.heightAnchor.constraint(equalToConstant: 36),
+            
             emptyTrackerStateStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            emptyTrackerStateStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            emptyTrackerStateStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 46),
+            
+            wrongTextSearchStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            wrongTextSearchStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 46),
+            
+            collectionView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 10),
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -176,10 +216,14 @@ final class TrackerViewController: UIViewController {
     }
 }
 
-    // MARK: - UISearchResultsUpdating
+    // MARK: - UITextFieldDelegate
 
-extension TrackerViewController: UISearchResultsUpdating {
-    func updateSearchResults(for searchController: UISearchController) {
+extension TrackerViewController: UITextFieldDelegate {
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        updateTrackersForDate()
+        return true
     }
 }
 
@@ -348,14 +392,21 @@ extension TrackerViewController {
     private func updateTrackersForDate() {
         currentDate = datePicker.date
         let selectedDayString = dayOfWeekString(for: currentDate)
+        let filtredText = (searchTextField.text ?? "").lowercased()
         
         visibleCategories = categories.compactMap { category in
             let tracker = category.trackers.filter { tracker in
                 guard !tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty else {
                     return true
                 }
-                return tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains(selectedDayString)
+                
+                let textCondition = filtredText.isEmpty ||
+                tracker.trackerName.lowercased().contains(filtredText)
+                let trackerCondition =  tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains(selectedDayString)
+                
+                return textCondition && trackerCondition
             }
+            
             if tracker.isEmpty {
                 return nil
             }
@@ -375,8 +426,24 @@ extension TrackerViewController {
     }
     
     private func updateUIForTrackers(_ containTrackers: Bool) {
-        emptyTrackerStateLabel.isHidden = containTrackers
-        emptyTrackerStateImage.isHidden = containTrackers
+        guard let searchTextField = searchTextField.text else { return }
+
+        if (!containTrackers || categories.isEmpty) && searchTextField.isEmpty {
+             emptyTrackerStateStackView.isHidden = false
+             wrongTextSearchStackView.isHidden = true
+        } else if !containTrackers && !categories.isEmpty && searchTextField.isEmpty{
+            emptyTrackerStateStackView.isHidden = false
+            wrongTextSearchStackView.isHidden = true
+        } else if containTrackers && !categories.isEmpty && searchTextField.isEmpty{
+            emptyTrackerStateStackView.isHidden = true
+            wrongTextSearchStackView.isHidden = true
+        } else if containTrackers && !searchTextField.isEmpty{
+            emptyTrackerStateStackView.isHidden = true
+            wrongTextSearchStackView.isHidden = true
+        } else {
+            emptyTrackerStateStackView.isHidden = true
+            wrongTextSearchStackView.isHidden = false
+        }
     }
     
     private func dayOfWeekString(for date: Date) -> String {
