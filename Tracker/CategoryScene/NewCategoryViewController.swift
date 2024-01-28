@@ -38,7 +38,7 @@ final class NewCategoryViewController: UIViewController {
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
-
+    
     private let saveButton: UIButton = {
         let saveButton = UIButton(type: .system)
         saveButton.setTitle("Готово", for: .normal)
@@ -63,7 +63,7 @@ final class NewCategoryViewController: UIViewController {
         super.viewDidLoad()
         title = "Новая категория"
         view.backgroundColor = .white
-
+        
         textField.delegate = self
         setupViews()
     }
@@ -73,7 +73,7 @@ final class NewCategoryViewController: UIViewController {
     private func setupViews() {
         view.addSubview(textField)
         view.addSubview(saveButton)
-
+        
         NSLayoutConstraint.activate([
             textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             textField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
@@ -103,7 +103,6 @@ final class NewCategoryViewController: UIViewController {
         }
         let newCategory = TrackerCategory(title: categoryName, trackers: [])
         delegate?.didAddCategory(newCategory)
-//        dismiss(animated: true, completion: nil)
         delegate?.newCategoryVCDidCancel(self)
     }
 }

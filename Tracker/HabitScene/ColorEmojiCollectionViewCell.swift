@@ -9,14 +9,14 @@ import Foundation
 import UIKit
 
 final class ColorEmojiCollectionViewCell: UICollectionViewCell {
-    let titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.font = .systemFont(ofSize: 32)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         return titleLabel
     }()
     
-    let imageView: UIImageView = {
+    private let imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -28,7 +28,7 @@ final class ColorEmojiCollectionViewCell: UICollectionViewCell {
         
         contentView.addSubview(imageView)
         contentView.addSubview(titleLabel)
-
+        
         NSLayoutConstraint.activate([
             imageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             imageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
@@ -39,6 +39,10 @@ final class ColorEmojiCollectionViewCell: UICollectionViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func configure(title: String) {
+        titleLabel.text = title
     }
     
     func configureColor(_ color: UIColor) {

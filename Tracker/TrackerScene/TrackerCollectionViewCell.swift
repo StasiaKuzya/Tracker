@@ -108,11 +108,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         super.init(frame: frame)
         setupViews()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     func setupViews() {
         colorView.addSubview(stackViewV)
         contentView.addSubview(colorView)
@@ -142,7 +142,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             stackViewH.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
         ])
     }
-
+    
     func configure(
         with tracker: Tracker,
         completedForDate: Bool,

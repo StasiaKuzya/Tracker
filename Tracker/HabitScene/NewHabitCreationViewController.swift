@@ -15,12 +15,12 @@ protocol TrackerDataDelegate: AnyObject {
 }
 
 final class NewHabitCreationViewController: UIViewController {
-
+    
     // MARK: -  Properties & Constants
     weak var delegate: TrackerDataDelegate?
-    var selectedIndexes: [Int: Int] = [:]
-    var selectedEmoji: String?
-    var selectedColor: UIColor?
+    private var selectedIndexes: [Int: Int] = [:]
+    private var selectedEmoji: String?
+    private var selectedColor: UIColor?
     
     private var words: [(title: String, subtitle: String?)] = [("Категория", nil), ("Расписание", nil)]
     
@@ -89,11 +89,11 @@ final class NewHabitCreationViewController: UIViewController {
         return tableView
     }()
     
-    let params = GeometricParams(cellCount: 6,
-                                 leftInset: 17,
-                                 rightInset: 17,
-                                 cellSpacing: 5)
-
+    private let params = GeometricParams(cellCount: 6,
+                                         leftInset: 17,
+                                         rightInset: 17,
+                                         cellSpacing: 5)
+    
     private var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -184,7 +184,7 @@ final class NewHabitCreationViewController: UIViewController {
             stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
+            
             textField.heightAnchor.constraint(equalToConstant: 75),
             tableView.widthAnchor.constraint(equalTo: stackView.widthAnchor),
             tableView.heightAnchor.constraint(equalToConstant: 150),
@@ -212,7 +212,7 @@ final class NewHabitCreationViewController: UIViewController {
         
         collectionView.register(ColorEmojiCollectionViewCell.self, forCellWithReuseIdentifier: "colorCellCV")
         collectionView.register(SupplementaryColorEmojiView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "colorHeader")
-
+        
     }
     
     private func showCategoryScreen() {
@@ -229,15 +229,15 @@ final class NewHabitCreationViewController: UIViewController {
         let scheduleNC = UINavigationController(rootViewController: scheduleVC)
         present(scheduleNC, animated: true, completion: nil)
     }
-
+    
     @objc private func cancelButtonTapped() {
         textField.resignFirstResponder()
         dismiss(animated: true)
     }
-
+    
     @objc private func creationButtonTapped() {
-//        guard let text = textField.text, text.count <= maxLength else {
-//            return
+        //        guard let text = textField.text, text.count <= maxLength else {
+        //            return
         
         if let trackerName = textField.text,
            !trackerName.isEmpty,
@@ -272,7 +272,7 @@ final class NewHabitCreationViewController: UIViewController {
     }
 }
 
-    // MARK: - UITableViewDataSource
+// MARK: - UITableViewDataSource
 
 extension NewHabitCreationViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -291,18 +291,18 @@ extension NewHabitCreationViewController: UITableViewDataSource {
         
         cell.textLabel?.text = cellInfo.title
         cell.textLabel?.numberOfLines = 1
-
+        
         if let subtitle = cellInfo.subtitle, !subtitle.isEmpty {
             let attributedText = NSMutableAttributedString(string: cellInfo.title, attributes: [
                 .foregroundColor: UIColor.designBlack,
                 .font: UIFont.systemFont(ofSize: 16, weight: .regular)
             ])
-
+            
             attributedText.append(NSAttributedString(string: "\n\(subtitle)", attributes: [
                 .foregroundColor: UIColor.designGray,
                 .font: UIFont.systemFont(ofSize: 16, weight: .regular)
             ]))
-
+            
             cell.textLabel?.attributedText = attributedText
             
             cell.textLabel?.numberOfLines = 0
@@ -312,7 +312,7 @@ extension NewHabitCreationViewController: UITableViewDataSource {
     }
 }
 
-    // MARK: - UITableViewDelegate
+// MARK: - UITableViewDelegate
 
 extension NewHabitCreationViewController: UITableViewDelegate {
     
@@ -333,7 +333,7 @@ extension NewHabitCreationViewController: UITableViewDelegate {
         return 75.0
     }
 }
-    // MARK: - UITextFieldDelegate
+// MARK: - UITextFieldDelegate
 
 extension NewHabitCreationViewController: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -342,11 +342,12 @@ extension NewHabitCreationViewController: UITextFieldDelegate {
     }
     
     private func updateCreationButtonColor() {
-        if let trackerName = textField.text,
+        if let
+            trackerName = textField.text,
            !trackerName.isEmpty,
-           let _ = selectedEmoji,
-           let _ = selectedColor,
-           let _ = selectedCategoryString,
+           selectedEmoji != nil,
+           selectedColor != nil,
+           selectedCategoryString != nil,
            !selectedDays.isEmpty {
             creationButton.isEnabled = true
             creationButton.backgroundColor = .designBlack
@@ -357,7 +358,7 @@ extension NewHabitCreationViewController: UITextFieldDelegate {
     }
 }
 
-    // MARK: - CategorySelectionDelegate
+// MARK: - CategorySelectionDelegate
 
 extension NewHabitCreationViewController: CategorySelectionDelegate {
     
@@ -374,7 +375,7 @@ extension NewHabitCreationViewController: CategorySelectionDelegate {
     }
 }
 
-    // MARK: - ScheduleSelectionDelegate
+// MARK: - ScheduleSelectionDelegate
 
 extension NewHabitCreationViewController: ScheduleSelectionDelegate {
     func didSelectDays(_ days: [String]) {
@@ -393,7 +394,7 @@ extension NewHabitCreationViewController: ScheduleSelectionDelegate {
         dismiss(animated: true, completion: nil)
     }
 }
-    // MARK: - UICollectionViewDataSource
+// MARK: - UICollectionViewDataSource
 
 extension NewHabitCreationViewController: UICollectionViewDataSource {
     
@@ -416,20 +417,20 @@ extension NewHabitCreationViewController: UICollectionViewDataSource {
         ) as? ColorEmojiCollectionViewCell else {
             return UICollectionViewCell()
         }
-
+        
         // Настроить ячейку
         cell.prepareForReuse()
         if collectionView == self.collectionView {
             if indexPath.section == 0 {
-                cell.titleLabel.text = emojies[indexPath.row]
                 cell.configureColor(.clear)
+                cell.configure(title: emojies[indexPath.row])
             } else {
                 let color = colors[indexPath.row]
                 cell.configureColor(color)
-
+                cell.configure(title: "")
             }
         }
-
+        
         // Возвратить ячейку
         return cell
     }
@@ -451,23 +452,34 @@ extension NewHabitCreationViewController: UICollectionViewDataSource {
                 view.titleLabel.text = indexPath.section == 0 ? "Emoji" : "Цвета"
             }
         }
-
+        
         return view
     }
 }
 
-    // MARK: - UICollectionViewDelegateFlowLayout
+// MARK: - UICollectionViewDelegateFlowLayout
 
 extension NewHabitCreationViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForHeaderInSection section: Int
+    ) -> CGSize {
         
         let indexPath = IndexPath(row: 0, section: section)
-        let headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: indexPath)
+        let headerView = self.collectionView(
+            collectionView,
+            viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader,
+            at: indexPath
+        )
         
-        return headerView.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width,
-                                                         height: UIView.layoutFittingExpandedSize.height),
-                                                  withHorizontalFittingPriority: .required,
-                                                  verticalFittingPriority: .fittingSizeLevel)
+        return headerView.systemLayoutSizeFitting(
+            CGSize(width: collectionView.frame.width,
+                   height: UIView.layoutFittingExpandedSize.height
+                  ),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -489,7 +501,7 @@ extension NewHabitCreationViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
-    // MARK: - NewHabitCreationViewController
+// MARK: - NewHabitCreationViewController
 
 extension NewHabitCreationViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -516,7 +528,7 @@ extension NewHabitCreationViewController: UICollectionViewDelegate {
         
         if indexPath.section == 0 {
             selectedEmoji = emojies[indexPath.row]
-            cell.pickConfiguredColor(.designBackground)
+            cell.configureColor(.designGray)
         } else {
             selectedColor = colors[indexPath.row]
             cell.pickConfiguredColor(selectedColor ?? .designBackground)

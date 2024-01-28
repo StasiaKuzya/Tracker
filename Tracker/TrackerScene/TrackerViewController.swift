@@ -30,7 +30,7 @@ final class TrackerViewController: UIViewController {
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
-
+    
     private var datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .date
@@ -106,7 +106,7 @@ final class TrackerViewController: UIViewController {
                                  leftInset: 16,
                                  rightInset: 16,
                                  cellSpacing: 9)
-
+    
     private var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -159,10 +159,10 @@ final class TrackerViewController: UIViewController {
             navigationController.navigationBar.prefersLargeTitles = true
             navigationItem.largeTitleDisplayMode = .always
             title = "Трекеры"
-               navigationController.navigationBar.largeTitleTextAttributes = [
-                   .foregroundColor: UIColor.designBlack,
-                   .font: UIFont.systemFont(ofSize: 34, weight: .bold)
-               ]
+            navigationController.navigationBar.largeTitleTextAttributes = [
+                .foregroundColor: UIColor.designBlack,
+                .font: UIFont.systemFont(ofSize: 34, weight: .bold)
+            ]
         }
     }
     
@@ -216,10 +216,10 @@ final class TrackerViewController: UIViewController {
     }
 }
 
-    // MARK: - UITextFieldDelegate
+// MARK: - UITextFieldDelegate
 
 extension TrackerViewController: UITextFieldDelegate {
-
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         updateTrackersForDate()
@@ -227,7 +227,7 @@ extension TrackerViewController: UITextFieldDelegate {
     }
 }
 
-    // MARK: - UICollectionViewDataSource
+// MARK: - UICollectionViewDataSource
 
 extension TrackerViewController: UICollectionViewDataSource {
     
@@ -237,39 +237,38 @@ extension TrackerViewController: UICollectionViewDataSource {
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        print("checking2 \(categories.count)")
         return categories.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         // Создать ячейку
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellTrackerCV", for: indexPath) as? TrackerCollectionViewCell else { return UICollectionViewCell() }
-
+        
         // Настроить ячейку
         let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
+        
+        cell.delegate = self
+        let isCompletedToday = isTrackerCompletedToday(id: tracker.trackerId)
+        let completedDays = completedTrackers.filter {
+            $0.trackerID == tracker.trackerId
+        }.count
+        
+        if  datePicker.date > Date() {
+            cell.button.isEnabled = false
+            cell.button.isHidden = true
             
-            cell.delegate = self
-            let isCompletedToday = isTrackerCompletedToday(id: tracker.trackerId)
-            let completedDays = completedTrackers.filter {
-                $0.trackerID == tracker.trackerId
-            }.count
-            
-            if  datePicker.date > Date() {
-                cell.button.isEnabled = false
-                cell.button.isHidden = true
-                
-            } else {
-                cell.button.isEnabled = true
-                cell.button.isHidden = false
-            }
-            
-            cell.configure(
-                with: tracker,
-                completedForDate: isCompletedToday,
-                completedDays: completedDays,
-                indexPath: indexPath
-            )
-
+        } else {
+            cell.button.isEnabled = true
+            cell.button.isHidden = false
+        }
+        
+        cell.configure(
+            with: tracker,
+            completedForDate: isCompletedToday,
+            completedDays: completedDays,
+            indexPath: indexPath
+        )
+        
         // Возвратить ячейку
         return cell
     }
@@ -284,7 +283,7 @@ extension TrackerViewController: UICollectionViewDataSource {
         let isSameDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: datePicker.date)
         return trackerRecord.trackerID  == id && isSameDay
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         var id: String
         switch kind {
@@ -299,18 +298,18 @@ extension TrackerViewController: UICollectionViewDataSource {
         guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as? SupplementaryTrackerView else {
             fatalError("Failed to dequeue SupplementaryTrackerView")
         }
-
+        
         if indexPath.section < visibleCategories.count {
             view.titleLabel.text = visibleCategories[indexPath.section].title
         } else {
             view.titleLabel.text = ""
         }
-
+        
         return view
     }
 }
 
-    // MARK: - UICollectionViewDelegateFlowLayout
+// MARK: - UICollectionViewDelegateFlowLayout
 
 extension TrackerViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
@@ -320,13 +319,13 @@ extension TrackerViewController: UICollectionViewDelegateFlowLayout {
         
         return headerView.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width,
                                                          height: UIView.layoutFittingExpandedSize.height),
-                                                         withHorizontalFittingPriority: .required,
-                                                         verticalFittingPriority: .fittingSizeLevel)
+                                                  withHorizontalFittingPriority: .required,
+                                                  verticalFittingPriority: .fittingSizeLevel)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-                let availableWidth = collectionView.frame.width - params.paddingWidth
-                let cellWidth =  availableWidth / CGFloat(params.cellCount)
+        let availableWidth = collectionView.frame.width - params.paddingWidth
+        let cellWidth =  availableWidth / CGFloat(params.cellCount)
         return CGSize(width: cellWidth, height: cellWidth * 0.87)
     }
     
@@ -343,7 +342,7 @@ extension TrackerViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
-    // MARK: - UICollectionViewDelegate
+// MARK: - UICollectionViewDelegate
 
 extension TrackerViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -351,16 +350,16 @@ extension TrackerViewController: UICollectionViewDelegate {
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-
+        
     }
 }
 
-    // MARK: - TrackerVCDataDelegate
+// MARK: - TrackerVCDataDelegate
 
 extension TrackerViewController: TrackerVCDataDelegate {
     
     func didUpdateTracker(_ tracker: Tracker) {
-
+        
         if let existingCategoryIndex = categories.firstIndex(where: { $0.title == tracker.category }) {
             // Категория уже существует, добавляем трекер в существующую категорию
             categories[existingCategoryIndex].trackers.append(tracker)
@@ -375,7 +374,7 @@ extension TrackerViewController: TrackerVCDataDelegate {
         // Добавляем трекер к общему массиву
         updateTrackersForDate()
         trackers.append(tracker)
-
+        
         // Обновляем UI
         collectionView.reloadData()
     }
@@ -385,7 +384,7 @@ extension TrackerViewController: TrackerVCDataDelegate {
     }
 }
 
-    // MARK: - Extension updateTrackersForDate()
+// MARK: - Extension updateTrackersForDate()
 
 extension TrackerViewController {
     
@@ -427,10 +426,10 @@ extension TrackerViewController {
     
     private func updateUIForTrackers(_ containTrackers: Bool) {
         guard let searchTextField = searchTextField.text else { return }
-
+        
         if (!containTrackers || categories.isEmpty) && searchTextField.isEmpty {
-             emptyTrackerStateStackView.isHidden = false
-             wrongTextSearchStackView.isHidden = true
+            emptyTrackerStateStackView.isHidden = false
+            wrongTextSearchStackView.isHidden = true
         } else if !containTrackers && !categories.isEmpty && searchTextField.isEmpty{
             emptyTrackerStateStackView.isHidden = false
             wrongTextSearchStackView.isHidden = true

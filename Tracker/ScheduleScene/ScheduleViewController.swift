@@ -22,7 +22,7 @@ final class ScheduleViewController: UIViewController {
     private let daysOfWeek: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
     
     private let shortDaysOfWeek: [String] = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
-
+    
     private var selectedDays: [String] = []
     
     private let tableView: UITableView = {
@@ -78,7 +78,7 @@ final class ScheduleViewController: UIViewController {
         
         tableView.rowHeight = 75
         let tableCount : CGFloat = CGFloat(daysOfWeek.count)
-
+        
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
@@ -109,15 +109,16 @@ extension ScheduleViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-       guard let cell = tableView.dequeueReusableCell(withIdentifier: "scheduleCell", for: indexPath) as? ScheduleTableViewCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "scheduleCell", for: indexPath) as? ScheduleTableViewCell else {
             fatalError("Unable to dequeue ScheduleTableViewCell")
         }
-
+        
         let day = daysOfWeek[indexPath.row]
         let shortDay = shortDaysOfWeek[indexPath.row]
-
+        
         cell.selectionStyle = .none
-        cell.dayLabel.text = day
+        //        cell.dayLabel.text = day
+        cell.configure(title: day)
         cell.switchControl.isOn = selectedDays.contains(shortDay)
         cell.switchControl.tag = indexPath.row
         

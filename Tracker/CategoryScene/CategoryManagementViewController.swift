@@ -19,7 +19,7 @@ final class CategoryManagementViewController: UIViewController {
     
     weak var categorySelectionDelegate: CategorySelectionDelegate?
     private var categories: [TrackerCategory] = []
-
+    
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.layer.cornerRadius = 16
@@ -29,7 +29,7 @@ final class CategoryManagementViewController: UIViewController {
         tableView.register(CategoryTableViewCell.self, forCellReuseIdentifier: "categoryCell")
         return tableView
     }()
-
+    
     private lazy var emptyTrackerStateStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [emptyTrackerStateImage, emptyTrackerStateLabel])
         stackView.axis = .vertical
@@ -57,7 +57,7 @@ final class CategoryManagementViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
+    
     private let addButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Добавить категорию", for: .normal)
@@ -100,7 +100,7 @@ final class CategoryManagementViewController: UIViewController {
         view.addSubview(tableView)
         view.addSubview(emptyTrackerStateStackView)
         view.addSubview(addButton)
-
+        
         tableView.layer.borderWidth = 1
         tableView.layer.borderColor = view.backgroundColor?.cgColor
         
@@ -113,26 +113,26 @@ final class CategoryManagementViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-
+            
             emptyTrackerStateStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             emptyTrackerStateStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -(60 + 16) / 2),
-
+            
             addButton.heightAnchor.constraint(equalToConstant: 60),
             addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             addButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             addButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20)
         ])
-
+        
         tableView.dataSource = self
         tableView.delegate = self
         
         tableView.isHidden = true
         emptyTrackerStateStackView.isHidden = true
     }
-
+    
     private func loadCategories() {
         // Загрузка категорий из хранилища
-
+        
         if categories.isEmpty {
             emptyTrackerStateStackView.isHidden = false
         } else {
@@ -149,7 +149,7 @@ final class CategoryManagementViewController: UIViewController {
             tableView.heightAnchor.constraint(greaterThanOrEqualToConstant: 75 * CGFloat(categories.count)),
         ])
     }
-
+    
     @objc private func addCategoryButtonTapped() {
         let newCategoryVC = NewCategoryViewController()
         newCategoryVC.delegate = self
@@ -158,13 +158,13 @@ final class CategoryManagementViewController: UIViewController {
     }
 }
 
-    // MARK: - UITableViewDataSource
+// MARK: - UITableViewDataSource
 
 extension CategoryManagementViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return categories.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)  as? CategoryTableViewCell else {
             fatalError("Unable to dequeue CategoryTableViewCell")
@@ -176,7 +176,7 @@ extension CategoryManagementViewController: UITableViewDataSource {
     }
 }
 
-    // MARK: - UITableViewDelegate
+// MARK: - UITableViewDelegate
 
 extension CategoryManagementViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -191,7 +191,7 @@ extension CategoryManagementViewController: UITableViewDelegate {
     }
 }
 
-    // MARK: - NewCategoryDelegate
+// MARK: - NewCategoryDelegate
 
 extension CategoryManagementViewController: NewCategoryDelegate {
     func didAddCategory(_ category: TrackerCategory) {

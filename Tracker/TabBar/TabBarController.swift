@@ -9,7 +9,7 @@ import Foundation
 import UIKit
  
 final class TabBarController: UITabBarController {
-
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -25,23 +25,23 @@ final class TabBarController: UITabBarController {
         let trackerViewController = TrackerViewController()
         let trackerNavigationController = UINavigationController(rootViewController: trackerViewController)
         trackerNavigationController.tabBarItem = UITabBarItem(title: "Трекеры",
-                                                        image: UIImage(named: "trackerTabBarImage"),
-                                                        selectedImage: nil)
+                                                              image: UIImage(named: "trackerTabBarImage"),
+                                                              selectedImage: nil)
         
         let statisticsViewController = StatisticsViewController()
         statisticsViewController.tabBarItem = UITabBarItem(title: "Статистика",
-                                                        image: UIImage(named: "statTabBarImage"),
-                                                        selectedImage: nil)
+                                                           image: UIImage(named: "statTabBarImage"),
+                                                           selectedImage: nil)
         
         self.viewControllers = [trackerNavigationController, statisticsViewController]
     }
     
     private func setupAppearance() {
         let appearance = UITabBarAppearance()
-
+        
         appearance.backgroundColor = .designWhite
         tabBar.standardAppearance = appearance
-
+        
         tabBar.tintColor = .designBlue
         
         tabBar.layer.borderWidth = 1.0

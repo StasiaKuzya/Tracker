@@ -14,7 +14,7 @@ protocol TrackerVCDataDelegate: AnyObject {
 }
 
 final class TrackerTypeSelectionViewController: UIViewController {
-
+    
     // MARK: -  Properties & Constants
     
     weak var delegate:TrackerVCDataDelegate?
@@ -35,7 +35,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
         habitButton.setTitle("Привычка", for: .normal)
         habitButton.titleLabel?.tintColor = .designWhite
         habitButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-
+        
         habitButton.addTarget(
             self,
             action: #selector(habitButtonTapped),
@@ -66,7 +66,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         view.backgroundColor = .white
         self.title = "Создание трекера"
         navigationController?.isNavigationBarHidden = false
@@ -102,21 +102,20 @@ final class TrackerTypeSelectionViewController: UIViewController {
         let irreguralEventNC = UINavigationController(rootViewController: irreguralEventVC)
         present(irreguralEventNC, animated: true, completion: nil)
     }
-
+    
     
     // MARK: - Methods
     
     @objc func habitButtonTapped() {
         showNewHabitCreationScreen()
-        }
-
+    }
+    
     @objc func irregularEventButtonTapped() {
         showCategoryScreen()
     }
-
 }
 
-    // MARK: - TrackerDataDelegate
+// MARK: - TrackerDataDelegate
 
 extension TrackerTypeSelectionViewController: TrackerDataDelegate {
     

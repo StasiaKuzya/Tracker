@@ -10,12 +10,12 @@ import UIKit
 
 
 final class IrreguralEventViewController: UIViewController {
-
+    
     // MARK: -  Properties & Constants
     weak var delegate: TrackerDataDelegate?
-    var selectedIndexes: [Int: Int] = [:]
-    var selectedEmoji: String?
-    var selectedColor: UIColor?
+    private var selectedIndexes: [Int: Int] = [:]
+    private var selectedEmoji: String?
+    private var selectedColor: UIColor?
     
     private var words: [(title: String, subtitle: String?)] = [("Категория", nil)]
     
@@ -84,11 +84,11 @@ final class IrreguralEventViewController: UIViewController {
         return tableView
     }()
     
-    let params = GeometricParams(cellCount: 6,
-                                 leftInset: 17,
-                                 rightInset: 17,
-                                 cellSpacing: 5)
-
+    private let params = GeometricParams(cellCount: 6,
+                                         leftInset: 17,
+                                         rightInset: 17,
+                                         cellSpacing: 5)
+    
     private var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -177,7 +177,7 @@ final class IrreguralEventViewController: UIViewController {
             stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
+            
             textField.heightAnchor.constraint(equalToConstant: 75),
             tableView.widthAnchor.constraint(equalTo: stackView.widthAnchor),
             tableView.heightAnchor.constraint(equalToConstant: 75),
@@ -205,7 +205,7 @@ final class IrreguralEventViewController: UIViewController {
         
         collectionView.register(ColorEmojiCollectionViewCell.self, forCellWithReuseIdentifier: "colorCellCV")
         collectionView.register(SupplementaryColorEmojiView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "colorHeader")
-
+        
     }
     
     private func showCategoryScreen() {
@@ -215,15 +215,15 @@ final class IrreguralEventViewController: UIViewController {
         let categoryManagementNC = UINavigationController(rootViewController: categoryManagementVC)
         present(categoryManagementNC, animated: true, completion: nil)
     }
-
+    
     @objc private func cancelButtonTapped() {
         textField.resignFirstResponder()
         dismiss(animated: true)
     }
-
+    
     @objc private func creationButtonTapped() {
-//        guard let text = textField.text, text.count <= maxLength else {
-//            return
+        //        guard let text = textField.text, text.count <= maxLength else {
+        //            return
         
         if let trackerName = textField.text,
            let selectedEmoji = selectedEmoji,
@@ -260,7 +260,7 @@ final class IrreguralEventViewController: UIViewController {
     }
 }
 
-    // MARK: - UITableViewDataSource
+// MARK: - UITableViewDataSource
 
 extension IrreguralEventViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -279,18 +279,18 @@ extension IrreguralEventViewController: UITableViewDataSource {
         
         cell.textLabel?.text = cellInfo.title
         cell.textLabel?.numberOfLines = 1
-
+        
         if let subtitle = cellInfo.subtitle, !subtitle.isEmpty {
             let attributedText = NSMutableAttributedString(string: cellInfo.title, attributes: [
                 .foregroundColor: UIColor.designBlack,
                 .font: UIFont.systemFont(ofSize: 16, weight: .regular)
             ])
-
+            
             attributedText.append(NSAttributedString(string: "\n\(subtitle)", attributes: [
                 .foregroundColor: UIColor.designGray,
                 .font: UIFont.systemFont(ofSize: 16, weight: .regular)
             ]))
-
+            
             cell.textLabel?.attributedText = attributedText
             
             cell.textLabel?.numberOfLines = 0
@@ -300,13 +300,13 @@ extension IrreguralEventViewController: UITableViewDataSource {
     }
 }
 
-    // MARK: - UITableViewDelegate
+// MARK: - UITableViewDelegate
 
 extension IrreguralEventViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-
+        
         switch indexPath.section {
         case 0:
             showCategoryScreen()
@@ -319,7 +319,7 @@ extension IrreguralEventViewController: UITableViewDelegate {
         return 75.0
     }
 }
-    // MARK: - UITextFieldDelegate
+// MARK: - UITextFieldDelegate
 
 extension IrreguralEventViewController: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -328,11 +328,12 @@ extension IrreguralEventViewController: UITextFieldDelegate {
     }
     
     private func updateCreationButtonColor() {
-        if let trackerName = textField.text,
+        if let
+            trackerName = textField.text,
            !trackerName.isEmpty,
-           let _ = selectedEmoji,
-           let _ = selectedColor,
-           let _ = selectedCategoryString {
+           selectedEmoji != nil,
+           selectedColor != nil,
+           selectedCategoryString != nil {
             creationButton.isEnabled = true
             creationButton.backgroundColor = .designBlack
         } else {
@@ -342,7 +343,7 @@ extension IrreguralEventViewController: UITextFieldDelegate {
     }
 }
 
-    // MARK: - CategorySelectionDelegate
+// MARK: - CategorySelectionDelegate
 
 extension IrreguralEventViewController: CategorySelectionDelegate {
     
@@ -359,7 +360,7 @@ extension IrreguralEventViewController: CategorySelectionDelegate {
     }
 }
 
-    // MARK: - UICollectionViewDataSource
+// MARK: - UICollectionViewDataSource
 
 extension IrreguralEventViewController: UICollectionViewDataSource {
     
@@ -382,20 +383,20 @@ extension IrreguralEventViewController: UICollectionViewDataSource {
         ) as? ColorEmojiCollectionViewCell else {
             return UICollectionViewCell()
         }
-
+        
         // Настроить ячейку
         cell.prepareForReuse()
         if collectionView == self.collectionView {
             if indexPath.section == 0 {
-                cell.titleLabel.text = emojies[indexPath.row]
                 cell.configureColor(.clear)
+                cell.configure(title: emojies[indexPath.row])
             } else {
                 let color = colors[indexPath.row]
                 cell.configureColor(color)
-
+                cell.configure(title: "")
             }
         }
-
+        
         // Возвратить ячейку
         return cell
     }
@@ -417,23 +418,31 @@ extension IrreguralEventViewController: UICollectionViewDataSource {
                 view.titleLabel.text = indexPath.section == 0 ? "Emoji" : "Цвета"
             }
         }
-
+        
         return view
     }
 }
 
-    // MARK: - UICollectionViewDelegateFlowLayout
+// MARK: - UICollectionViewDelegateFlowLayout
 
 extension IrreguralEventViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForHeaderInSection section: Int
+    ) -> CGSize {
         
         let indexPath = IndexPath(row: 0, section: section)
-        let headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: indexPath)
+        let headerView = self.collectionView(
+            collectionView,
+            viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader,
+            at: indexPath)
         
-        return headerView.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width,
-                                                         height: UIView.layoutFittingExpandedSize.height),
-                                                  withHorizontalFittingPriority: .required,
-                                                  verticalFittingPriority: .fittingSizeLevel)
+        return headerView.systemLayoutSizeFitting(
+            CGSize(width: collectionView.frame.width,
+                   height: UIView.layoutFittingExpandedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -455,7 +464,7 @@ extension IrreguralEventViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
-    // MARK: - IrreguralEventViewController
+// MARK: - IrreguralEventViewController
 
 extension IrreguralEventViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -482,7 +491,7 @@ extension IrreguralEventViewController: UICollectionViewDelegate {
         
         if indexPath.section == 0 {
             selectedEmoji = emojies[indexPath.row]
-            cell.pickConfiguredColor(.designBackground)
+            cell.configureColor(.designGray)
         } else {
             selectedColor = colors[indexPath.row]
             cell.pickConfiguredColor(selectedColor ?? .designBackground)
