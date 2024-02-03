@@ -401,7 +401,8 @@ extension TrackerViewController {
                 
                 let textCondition = filtredText.isEmpty ||
                 tracker.trackerName.lowercased().contains(filtredText)
-                let trackerCondition =  tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains(selectedDayString)
+                let trackerCondition = tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains { $0.shortName == selectedDayString } || tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty
+
                 
                 return textCondition && trackerCondition
             }

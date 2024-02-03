@@ -47,7 +47,8 @@ final class IrreguralEventViewController: UIViewController {
         UIColor.colorSection17,
         UIColor.colorSection18
     ]
-    private var selectedDays: [String] = []
+//    private var selectedDays: [String] = []
+    private var selectedDays: [WeekDay] = []
     
     private lazy var stackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [textField, tableView])
@@ -491,7 +492,7 @@ extension IrreguralEventViewController: UICollectionViewDelegate {
         
         if indexPath.section == 0 {
             selectedEmoji = emojies[indexPath.row]
-            cell.configureColor(.designGray)
+            cell.configureColor(.designLightGray)
         } else {
             selectedColor = colors[indexPath.row]
             cell.pickConfiguredColor(selectedColor ?? .designBackground)
