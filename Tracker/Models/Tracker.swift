@@ -26,11 +26,11 @@ struct Tracker {
     }
 }
 
-struct TrackerSchedule {
+struct TrackerSchedule: Codable {
     let trackerScheduleDaysOfWeek: [WeekDay]
 }
 
-enum WeekDay: String {
+enum WeekDay: String, Codable {
     case monday = "Понедельник"
     case tuesday = "Вторник"
     case wednesday = "Среда"
@@ -49,5 +49,21 @@ enum WeekDay: String {
         case .saturday: return "Сб"
         case .sunday: return "Вс"
         }
+    }
+}
+
+extension WeekDay {
+    func convertToData() throws -> Data {
+        let encoder = JSONEncoder()
+        return try encoder.encode(self.rawValue)
+    }
+
+    static func convertFromData(data: Data) throws -> WeekDay {
+        let decoder = JSONDecoder()
+        let rawValue = try decoder.decode(String.self, from: data)
+        guard let day = WeekDay(rawValue: rawValue) else {
+            throw NSError(domain: "Invalid WeekDay raw value", code: 0, userInfo: nil)
+        }
+        return day
     }
 }

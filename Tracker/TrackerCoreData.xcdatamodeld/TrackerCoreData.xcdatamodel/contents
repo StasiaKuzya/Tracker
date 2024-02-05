@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21754" systemVersion="22F66" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="TrackerCategoryCoreData" representedClassName="TrackerCategoryCoreData" syncable="YES" codeGenerationType="class">
-        <attribute name="title" optional="YES" attributeType="String"/>
-        <attribute name="trackers" optional="YES" attributeType="Transformable"/>
+        <attribute name="title" attributeType="String"/>
         <relationship name="trackerCoreData" toMany="YES" deletionRule="Nullify" destinationEntity="TrackerCoreData" inverseName="trackerCategoryCoreData" inverseEntity="TrackerCoreData"/>
     </entity>
     <entity name="TrackerCoreData" representedClassName="TrackerCoreData" syncable="YES" codeGenerationType="class">
         <attribute name="category" attributeType="String"/>
-        <attribute name="trackerColor" attributeType="Transformable"/>
+        <attribute name="trackerColor" attributeType="String"/>
         <attribute name="trackerEmoji" attributeType="String"/>
         <attribute name="trackerId" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="trackerName" attributeType="String"/>
-        <attribute name="trackerSchedule" attributeType="Transformable"/>
+        <attribute name="trackerSchedule" attributeType="Binary" valueTransformerName="TrackerScheduleTransformer"/>
         <relationship name="trackerCategoryCoreData" maxCount="1" deletionRule="Nullify" destinationEntity="TrackerCategoryCoreData" inverseName="trackerCoreData" inverseEntity="TrackerCategoryCoreData"/>
         <relationship name="trackerRecordCoreDate" toMany="YES" deletionRule="Nullify" destinationEntity="TrackerRecordCoreData" inverseName="trackerCoreData" inverseEntity="TrackerRecordCoreData"/>
     </entity>

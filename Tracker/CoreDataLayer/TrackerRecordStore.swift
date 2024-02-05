@@ -32,3 +32,33 @@ final class TrackerRecordStore {
         trackerRecordCoreData.date = trackerRecord.date
     }
 }
+
+extension TrackerRecordStore {
+    func fetchAllTrackerRecords() -> [TrackerRecord] {
+        do {
+            let request = NSFetchRequest<TrackerRecordCoreData>(entityName: "TrackerRecordCoreData")
+            let trackerRecordsCoreData = try context.fetch(request)
+            return trackerRecordsCoreData.map { coreDataObject in
+                return TrackerRecord(trackerID: coreDataObject.trackerID ?? UUID(), date: coreDataObject.date ?? Date())
+            }
+        } catch {
+            print("Failed to fetch tracker records: \(error)")
+            return []
+        }
+    }
+    
+    func deleteTrackerRecord(_ trackerRecord: TrackerRecord) throws {
+        let request = NSFetchRequest<TrackerRecordCoreData>(entityName: "TrackerRecordCoreData")
+        request.predicate = NSPredicate(format: "trackerID == %@ AND date == %@", trackerRecord.trackerID as CVarArg, trackerRecord.date as CVarArg)
+        
+        do {
+            let trackerRecordsCoreData = try context.fetch(request)
+            if let firstTrackerRecordCoreData = trackerRecordsCoreData.first {
+                context.delete(firstTrackerRecordCoreData)
+                try context.save()
+            }
+        } catch {
+            throw error
+        }
+    }
+}
