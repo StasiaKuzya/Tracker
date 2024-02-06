@@ -15,14 +15,16 @@ struct Tracker {
     let trackerEmoji: String
     let trackerSchedule: TrackerSchedule
     let category: String
+    let isDone: Bool
     
-    init(trackerId: UUID, trackerName: String, trackerColor: UIColor, trackerEmoji: String, trackerSchedule: TrackerSchedule, category: String) {
+    init(trackerId: UUID, trackerName: String, trackerColor: UIColor, trackerEmoji: String, trackerSchedule: TrackerSchedule, category: String, isDone: Bool) {
         self.trackerId = trackerId
         self.trackerName = trackerName
         self.trackerColor = trackerColor
         self.trackerEmoji = trackerEmoji
         self.trackerSchedule = trackerSchedule
         self.category = category
+        self.isDone = isDone
     }
 }
 

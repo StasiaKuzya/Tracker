@@ -13,6 +13,7 @@ final class TrackerViewController: UIViewController {
     // MARK: -  Properties & Constants
     private let trackerStore = TrackerStore()
     private let trackerCategoryStore = TrackerCategoryStore()
+    private let trackerRecordStore = TrackerRecordStore()
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru_RU")
@@ -134,6 +135,7 @@ final class TrackerViewController: UIViewController {
         setupViews()
         trackers = try! trackerStore.fetchTrackers()
         categories = trackerCategoryStore.fetchAllCategories()
+        completedTrackers = trackerRecordStore.fetchAllTrackerRecords()
         updateTrackersForDate()
     }
     
@@ -509,15 +511,35 @@ extension TrackerViewController: TrackerCellDelegate {
             trackerID: id,
             date: datePicker.date)
         completedTrackers.append(trackerRecord)
+        addRecordedTrackersToCD(trackerRecord: trackerRecord)
         
         collectionView.reloadItems(at: [indexPath])
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
-        completedTrackers.removeAll { trackerRecord in
-            isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        if let indexToDelete = completedTrackers.firstIndex(where: {
+            isSameTrackerRecord(trackerRecord: $0, id: id)
+        }) {
+            let trackerRecordToDelete = completedTrackers[indexToDelete]
+            deleteRecordedTrackersToCD(trackerRecord: trackerRecordToDelete)
+            completedTrackers.remove(at: indexToDelete)
         }
-        
         collectionView.reloadItems(at: [indexPath])
+    }
+    
+    private func addRecordedTrackersToCD(trackerRecord: TrackerRecord) {
+        do {
+            try trackerRecordStore.addTracker(trackerRecord)
+        } catch let error as NSError {
+            print("Failed to add tracker to Core Data: \(error)")
+        }
+    }
+    
+    private func deleteRecordedTrackersToCD(trackerRecord: TrackerRecord) {
+        do {
+            try trackerRecordStore.deleteTrackerRecord(trackerRecord)
+        } catch let error as NSError {
+            print("Failed to add tracker to Core Data: \(error)")
+        }
     }
 }

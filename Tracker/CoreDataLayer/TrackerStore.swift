@@ -73,6 +73,8 @@ final class TrackerStore: NSObject {
             print("Error fetching category: \(error)")
         }
         trackerCoreData.category = trackerCoreData.trackerCategoryCoreData?.title
+        
+        trackerCoreData.isDone = ((trackerCoreData.trackerRecordCoreDate?.contains(tracker.trackerId)) != nil)
     }
     
     func createCategory(title: String) -> TrackerCategoryCoreData {
@@ -84,6 +86,13 @@ final class TrackerStore: NSObject {
     func fetchCategoryByName(_ categoryName: String) throws -> TrackerCategoryCoreData? {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "title == %@", categoryName)
+        
+        return try context.fetch(fetchRequest).first
+    }
+    
+    func fetchTrackerByIdForRecords(_ trackerId: UUID) throws -> TrackerCoreData? {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "trackerId == %@", trackerId as CVarArg)
         
         return try context.fetch(fetchRequest).first
     }
@@ -118,14 +127,18 @@ extension TrackerStore {
         }
         
         let category = trackerCorData.category ?? ""
-
+        
+        // Проверка наличия трекера в записях
+        let isDone = trackerCorData.trackerRecordCoreDate?.contains(trackerId) == true
+        
         return Tracker(
             trackerId: trackerId,
             trackerName: trackerName,
             trackerColor: UIColor(hexString: trackerColorHex) ?? .designBlue,
             trackerEmoji: trackerEmoji,
             trackerSchedule: trackerSchedule,
-            category: category
+            category: category,
+            isDone: isDone
         )
     }
 }

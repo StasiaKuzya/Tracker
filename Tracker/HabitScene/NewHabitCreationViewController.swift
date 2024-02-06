@@ -259,7 +259,8 @@ final class NewHabitCreationViewController: UIViewController {
                 trackerEmoji: selectedEmoji,
                 trackerSchedule: TrackerSchedule(
                     trackerScheduleDaysOfWeek: selectedDays),
-                category: selectedCategoryString
+                category: selectedCategoryString,
+                isDone: false
             )
             
             delegate?.didCreateTracker(tracker)

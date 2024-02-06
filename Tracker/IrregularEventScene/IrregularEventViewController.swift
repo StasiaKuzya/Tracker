@@ -243,7 +243,8 @@ final class IrreguralEventViewController: UIViewController {
                 trackerEmoji: selectedEmoji,
                 trackerSchedule: TrackerSchedule(
                     trackerScheduleDaysOfWeek: selectedDays),
-                category: selectedCategoryString
+                category: selectedCategoryString,
+                isDone: false
             )
             
             delegate?.didCreateTracker(tracker)
