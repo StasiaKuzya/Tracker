@@ -112,7 +112,7 @@ final class NewHabitCreationViewController: UIViewController {
         return stackView
     }()
     
-    private let cancelButton: UIButton = {
+    private lazy var cancelButton: UIButton = {
         let cancelButton = UIButton(type: .system)
         cancelButton.setTitle("Отменить", for: .normal)
         
@@ -130,7 +130,7 @@ final class NewHabitCreationViewController: UIViewController {
         return cancelButton
     }()
     
-    private let creationButton: UIButton = {
+    private lazy var creationButton: UIButton = {
         let creationButton = UIButton(type: .system)
         creationButton.setTitle("Создать", for: .normal)
         

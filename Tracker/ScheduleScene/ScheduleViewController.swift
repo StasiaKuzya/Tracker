@@ -19,8 +19,6 @@ final class ScheduleViewController: UIViewController {
     
     weak var scheduleDelegate: ScheduleSelectionDelegate?
     
-//    private let daysOfWeek: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
-//    private let shortDaysOfWeek: [String] = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
     private var daysOfWeek: [WeekDay] = []
     private var shortDaysOfWeek: [String] = []
 
@@ -37,7 +35,7 @@ final class ScheduleViewController: UIViewController {
         return tableView
     }()
     
-    private let saveButton: UIButton = {
+    private lazy var saveButton: UIButton = {
         let saveButton = UIButton(type: .system)
         saveButton.setTitle("Готово", for: .normal)
         saveButton.isEnabled = false
@@ -123,7 +121,7 @@ extension ScheduleViewController: UITableViewDataSource {
         }
 
         let day = daysOfWeek[indexPath.row]
-        let shortDay = shortDaysOfWeek[indexPath.row]
+        _ = shortDaysOfWeek[indexPath.row]
 
         cell.selectionStyle = .none
         cell.configure(title: day.rawValue)
@@ -135,9 +133,7 @@ extension ScheduleViewController: UITableViewDataSource {
     }
 
     @objc func switchChanged(_ sender: UISwitch) {
-//        let selectedDay = shortDaysOfWeek[sender.tag]
         let selectedDay = daysOfWeek[sender.tag]
-//        guard let weekDay = WeekDay(rawValue: selectedDay) else { return }
 
         if sender.isOn {
             selectedDays.append(selectedDay)
