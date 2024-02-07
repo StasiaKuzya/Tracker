@@ -11,7 +11,9 @@ import UIKit
 final class TrackerViewController: UIViewController {
     
     // MARK: -  Properties & Constants
-    
+    private let trackerStore = TrackerStore()
+    private let trackerCategoryStore = TrackerCategoryStore()
+    private let trackerRecordStore = TrackerRecordStore()
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru_RU")
@@ -131,6 +133,9 @@ final class TrackerViewController: UIViewController {
         addTBViews()
         addNCViews()
         setupViews()
+        trackers = try! trackerStore.fetchTrackers()
+        categories = trackerCategoryStore.fetchAllCategories()
+        completedTrackers = trackerRecordStore.fetchAllTrackerRecords()
         updateTrackersForDate()
     }
     
@@ -187,7 +192,7 @@ final class TrackerViewController: UIViewController {
             wrongTextSearchStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 46),
             
             collectionView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 10),
-            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             datePicker.widthAnchor.constraint(equalToConstant: 120)
@@ -357,26 +362,40 @@ extension TrackerViewController: UICollectionViewDelegate {
 // MARK: - TrackerVCDataDelegate
 
 extension TrackerViewController: TrackerVCDataDelegate {
-    
-    func didUpdateTracker(_ tracker: Tracker) {
         
+    func didUpdateTracker(_ tracker: Tracker) {
+        // Добавление трекера в Core Data
+        addTrackersToCD(tracker: tracker)
+        
+        // Обновление категорий
         if let existingCategoryIndex = categories.firstIndex(where: { $0.title == tracker.category }) {
-            // Категория уже существует, добавляем трекер в существующую категорию
             categories[existingCategoryIndex].trackers.append(tracker)
         } else {
-            // Категории не существует, создаем новую категорию и добавляем трекер
             let categoryTracker = TrackerCategory(
                 title: tracker.category,
                 trackers: [tracker]
             )
             categories.append(categoryTracker)
         }
-        // Добавляем трекер к общему массиву
-        updateTrackersForDate()
-        trackers.append(tracker)
         
-        // Обновляем UI
+        // Обновление UI
+        updateTrackersForDate()
         collectionView.reloadData()
+    }
+    
+    private func addTrackersToCD(tracker: Tracker) {
+        do {
+            try trackerStore.addTracker(tracker)
+        } catch let error as NSError {
+            print("Failed to add tracker to Core Data: \(error)")
+            if let detailedErrors = error as? [NSError] {
+                for detailedError in detailedErrors {
+                    print("Detailed error: \(detailedError.userInfo)")
+                }
+            } else {
+                print("No detailed errors")
+            }
+        }
     }
     
     func trackerTypeSelectionVCDismissed(_ vc: TrackerTypeSelectionViewController) {
@@ -393,6 +412,9 @@ extension TrackerViewController {
         let selectedDayString = dayOfWeekString(for: currentDate)
         let filtredText = (searchTextField.text ?? "").lowercased()
         
+        // Извлекаем данные из Core Data
+        extractDataFromCD()
+        
         visibleCategories = categories.compactMap { category in
             let tracker = category.trackers.filter { tracker in
                 guard !tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty else {
@@ -401,7 +423,7 @@ extension TrackerViewController {
                 
                 let textCondition = filtredText.isEmpty ||
                 tracker.trackerName.lowercased().contains(filtredText)
-                let trackerCondition =  tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains(selectedDayString)
+                let trackerCondition = tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains { $0.shortName == selectedDayString } || tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty
                 
                 return textCondition && trackerCondition
             }
@@ -422,6 +444,34 @@ extension TrackerViewController {
         
         updateUIForTrackers(containTrackers)
         collectionView.reloadData()
+    }
+    
+    private func extractDataFromCD() {
+        do {
+            // Извлекаем трекеры из Core Data
+            let coreDataTrackers = try trackerStore.fetchTrackers()
+            trackers = coreDataTrackers.map { coreDataTrackers in
+                return coreDataTrackers
+            }
+            // Извлекаем категории из Core Data
+            let coreDataTrackersCategories = trackerCategoryStore.fetchAllCategories()
+            categories = coreDataTrackersCategories.map { coreDataTrackersCategory in
+                return coreDataTrackersCategory
+            }
+
+            // Проходим по каждой категории
+            for categoryIndex in categories.indices {
+                // Фильтруем трекеры, которые принадлежат текущей категории
+                let categoryTrackers = coreDataTrackers.filter { tracker in
+                    return tracker.category.lowercased() == categories[categoryIndex].title.lowercased()
+                }
+
+                categories[categoryIndex].trackers = categoryTrackers
+            }
+        } catch {
+            print("Failed to fetch trackers from Core Data: \(error)")
+            return
+        }
     }
     
     private func updateUIForTrackers(_ containTrackers: Bool) {
@@ -448,7 +498,6 @@ extension TrackerViewController {
     private func dayOfWeekString(for date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "E"
-        formatter.locale = Locale(identifier: "ru_RU")
         return formatter.string(from: date)
     }
 }
@@ -461,15 +510,35 @@ extension TrackerViewController: TrackerCellDelegate {
             trackerID: id,
             date: datePicker.date)
         completedTrackers.append(trackerRecord)
+        addRecordedTrackersToCD(trackerRecord: trackerRecord)
         
         collectionView.reloadItems(at: [indexPath])
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
-        completedTrackers.removeAll { trackerRecord in
-            isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        if let indexToDelete = completedTrackers.firstIndex(where: {
+            isSameTrackerRecord(trackerRecord: $0, id: id)
+        }) {
+            let trackerRecordToDelete = completedTrackers[indexToDelete]
+            deleteRecordedTrackersToCD(trackerRecord: trackerRecordToDelete)
+            completedTrackers.remove(at: indexToDelete)
         }
-        
         collectionView.reloadItems(at: [indexPath])
+    }
+    
+    private func addRecordedTrackersToCD(trackerRecord: TrackerRecord) {
+        do {
+            try trackerRecordStore.addTracker(trackerRecord)
+        } catch let error as NSError {
+            print("Failed to add tracker to Core Data: \(error)")
+        }
+    }
+    
+    private func deleteRecordedTrackersToCD(trackerRecord: TrackerRecord) {
+        do {
+            try trackerRecordStore.deleteTrackerRecord(trackerRecord)
+        } catch let error as NSError {
+            print("Failed to add tracker to Core Data: \(error)")
+        }
     }
 }

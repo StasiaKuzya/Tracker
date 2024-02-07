@@ -52,7 +52,8 @@ final class NewHabitCreationViewController: UIViewController {
         UIColor.colorSection17,
         UIColor.colorSection18
     ]
-    private var selectedDays: [String] = []
+//    private var selectedDays: [String] = []
+    private var selectedDays: [WeekDay] = []
     
     private lazy var stackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [textField, tableView])
@@ -111,7 +112,7 @@ final class NewHabitCreationViewController: UIViewController {
         return stackView
     }()
     
-    private let cancelButton: UIButton = {
+    private lazy var cancelButton: UIButton = {
         let cancelButton = UIButton(type: .system)
         cancelButton.setTitle("Отменить", for: .normal)
         
@@ -129,7 +130,7 @@ final class NewHabitCreationViewController: UIViewController {
         return cancelButton
     }()
     
-    private let creationButton: UIButton = {
+    private lazy var creationButton: UIButton = {
         let creationButton = UIButton(type: .system)
         creationButton.setTitle("Создать", for: .normal)
         
@@ -258,7 +259,8 @@ final class NewHabitCreationViewController: UIViewController {
                 trackerEmoji: selectedEmoji,
                 trackerSchedule: TrackerSchedule(
                     trackerScheduleDaysOfWeek: selectedDays),
-                category: selectedCategoryString
+                category: selectedCategoryString,
+                isDone: false
             )
             
             delegate?.didCreateTracker(tracker)
@@ -378,12 +380,14 @@ extension NewHabitCreationViewController: CategorySelectionDelegate {
 // MARK: - ScheduleSelectionDelegate
 
 extension NewHabitCreationViewController: ScheduleSelectionDelegate {
-    func didSelectDays(_ days: [String]) {
+    func didSelectDays(_ days: [WeekDay]) {
         selectedDays = days
+        let shortDayNames = days.map { $0.shortName }
+        
         if days.count == 7 {
             words[1].subtitle = "Каждый день"
         } else {
-            words[1].subtitle = days.joined(separator: ", ")
+            words[1].subtitle = shortDayNames.joined(separator: ", ")
         }
         tableView.reloadData()
         
@@ -528,7 +532,7 @@ extension NewHabitCreationViewController: UICollectionViewDelegate {
         
         if indexPath.section == 0 {
             selectedEmoji = emojies[indexPath.row]
-            cell.configureColor(.designGray)
+            cell.configureColor(.designLightGray)
         } else {
             selectedColor = colors[indexPath.row]
             cell.pickConfiguredColor(selectedColor ?? .designBackground)

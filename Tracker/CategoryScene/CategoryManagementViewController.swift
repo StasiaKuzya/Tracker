@@ -58,7 +58,7 @@ final class CategoryManagementViewController: UIViewController {
         return label
     }()
     
-    private let addButton: UIButton = {
+    private lazy var addButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Добавить категорию", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)

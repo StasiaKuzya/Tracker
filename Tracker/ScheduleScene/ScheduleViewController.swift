@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 protocol ScheduleSelectionDelegate: AnyObject {
-    func didSelectDays(_ days: [String])
+    func didSelectDays(_ days: [WeekDay])
     func scheduleVCDismissed(_ vc: ScheduleViewController)
 }
 
@@ -19,11 +19,11 @@ final class ScheduleViewController: UIViewController {
     
     weak var scheduleDelegate: ScheduleSelectionDelegate?
     
-    private let daysOfWeek: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+    private var daysOfWeek: [WeekDay] = []
+    private var shortDaysOfWeek: [String] = []
+
     
-    private let shortDaysOfWeek: [String] = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
-    
-    private var selectedDays: [String] = []
+    private var selectedDays: [WeekDay] = []
     
     private let tableView: UITableView = {
         let tableView = UITableView()
@@ -35,7 +35,7 @@ final class ScheduleViewController: UIViewController {
         return tableView
     }()
     
-    private let saveButton: UIButton = {
+    private lazy var saveButton: UIButton = {
         let saveButton = UIButton(type: .system)
         saveButton.setTitle("Готово", for: .normal)
         saveButton.isEnabled = false
@@ -60,10 +60,17 @@ final class ScheduleViewController: UIViewController {
         title = "Расписание"
         view.backgroundColor = .white
         
+        setDaysOfWeek()
+        
         setupViews()
     }
     
     // MARK: - Private Methods
+    
+    private func setDaysOfWeek() {
+        daysOfWeek = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
+        shortDaysOfWeek = daysOfWeek.map { $0.shortName }
+    }
     
     private func setupViews() {
         view.addSubview(tableView)
@@ -112,23 +119,22 @@ extension ScheduleViewController: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "scheduleCell", for: indexPath) as? ScheduleTableViewCell else {
             fatalError("Unable to dequeue ScheduleTableViewCell")
         }
-        
+
         let day = daysOfWeek[indexPath.row]
-        let shortDay = shortDaysOfWeek[indexPath.row]
-        
+        _ = shortDaysOfWeek[indexPath.row]
+
         cell.selectionStyle = .none
-        //        cell.dayLabel.text = day
-        cell.configure(title: day)
-        cell.switchControl.isOn = selectedDays.contains(shortDay)
+        cell.configure(title: day.rawValue)
+        cell.switchControl.isOn = selectedDays.contains(day)
         cell.switchControl.tag = indexPath.row
-        
+
         updateSaveButtonState()
         return cell
     }
-    
+
     @objc func switchChanged(_ sender: UISwitch) {
-        let selectedDay = shortDaysOfWeek[sender.tag]
-        
+        let selectedDay = daysOfWeek[sender.tag]
+
         if sender.isOn {
             selectedDays.append(selectedDay)
         } else {

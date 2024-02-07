@@ -30,7 +30,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
         return stackView
     }()
     
-    private let habitButton: UIButton = {
+    private lazy var habitButton: UIButton = {
         let habitButton = UIButton(type: .system)
         habitButton.setTitle("Привычка", for: .normal)
         habitButton.titleLabel?.tintColor = .designWhite
@@ -46,7 +46,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
         return habitButton
     }()
     
-    private let irregularEventButton: UIButton = {
+    private lazy var irregularEventButton: UIButton = {
         let irregularEventButton = UIButton(type: .system)
         irregularEventButton.setTitle("Нерегулярное событие", for: .normal)
         irregularEventButton.titleLabel?.tintColor = .designWhite

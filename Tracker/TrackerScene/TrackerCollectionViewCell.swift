@@ -81,7 +81,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return daysCountLabel
     }()
     
-    let button: UIButton = {
+    lazy var button: UIButton = {
         let button = UIButton(type: .system)
         let addButtonImage = UIImage(named: "AddButton")
         button.setImage(addButtonImage, for: .normal)

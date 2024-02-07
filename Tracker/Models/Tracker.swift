@@ -15,17 +15,57 @@ struct Tracker {
     let trackerEmoji: String
     let trackerSchedule: TrackerSchedule
     let category: String
+    let isDone: Bool
     
-    init(trackerId: UUID, trackerName: String, trackerColor: UIColor, trackerEmoji: String, trackerSchedule: TrackerSchedule, category: String) {
+    init(trackerId: UUID, trackerName: String, trackerColor: UIColor, trackerEmoji: String, trackerSchedule: TrackerSchedule, category: String, isDone: Bool) {
         self.trackerId = trackerId
         self.trackerName = trackerName
         self.trackerColor = trackerColor
         self.trackerEmoji = trackerEmoji
         self.trackerSchedule = trackerSchedule
         self.category = category
+        self.isDone = isDone
     }
 }
 
 struct TrackerSchedule: Codable {
-    let trackerScheduleDaysOfWeek: [String]
+    let trackerScheduleDaysOfWeek: [WeekDay]
+}
+
+enum WeekDay: String, Codable {
+    case monday = "Понедельник"
+    case tuesday = "Вторник"
+    case wednesday = "Среда"
+    case thursday = "Четверг"
+    case friday = "Пятница"
+    case saturday = "Суббота"
+    case sunday = "Воскресенье"
+    
+    var shortName: String {
+        switch self {
+        case .monday: return "Пн"
+        case .tuesday: return "Вт"
+        case .wednesday: return "Ср"
+        case .thursday: return "Чт"
+        case .friday: return "Пт"
+        case .saturday: return "Сб"
+        case .sunday: return "Вс"
+        }
+    }
+}
+
+extension WeekDay {
+    func convertToData() throws -> Data {
+        let encoder = JSONEncoder()
+        return try encoder.encode(self.rawValue)
+    }
+
+    static func convertFromData(data: Data) throws -> WeekDay {
+        let decoder = JSONDecoder()
+        let rawValue = try decoder.decode(String.self, from: data)
+        guard let day = WeekDay(rawValue: rawValue) else {
+            throw NSError(domain: "Invalid WeekDay raw value", code: 0, userInfo: nil)
+        }
+        return day
+    }
 }

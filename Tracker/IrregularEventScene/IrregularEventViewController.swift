@@ -47,7 +47,8 @@ final class IrreguralEventViewController: UIViewController {
         UIColor.colorSection17,
         UIColor.colorSection18
     ]
-    private var selectedDays: [String] = []
+//    private var selectedDays: [String] = []
+    private var selectedDays: [WeekDay] = []
     
     private lazy var stackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [textField, tableView])
@@ -106,7 +107,7 @@ final class IrreguralEventViewController: UIViewController {
         return stackView
     }()
     
-    private let cancelButton: UIButton = {
+    private lazy var cancelButton: UIButton = {
         let cancelButton = UIButton(type: .system)
         cancelButton.setTitle("Отменить", for: .normal)
         
@@ -124,7 +125,7 @@ final class IrreguralEventViewController: UIViewController {
         return cancelButton
     }()
     
-    private let creationButton: UIButton = {
+    private lazy var creationButton: UIButton = {
         let creationButton = UIButton(type: .system)
         creationButton.setTitle("Создать", for: .normal)
         
@@ -242,7 +243,8 @@ final class IrreguralEventViewController: UIViewController {
                 trackerEmoji: selectedEmoji,
                 trackerSchedule: TrackerSchedule(
                     trackerScheduleDaysOfWeek: selectedDays),
-                category: selectedCategoryString
+                category: selectedCategoryString,
+                isDone: false
             )
             
             delegate?.didCreateTracker(tracker)
@@ -491,7 +493,7 @@ extension IrreguralEventViewController: UICollectionViewDelegate {
         
         if indexPath.section == 0 {
             selectedEmoji = emojies[indexPath.row]
-            cell.configureColor(.designGray)
+            cell.configureColor(.designLightGray)
         } else {
             selectedColor = colors[indexPath.row]
             cell.pickConfiguredColor(selectedColor ?? .designBackground)

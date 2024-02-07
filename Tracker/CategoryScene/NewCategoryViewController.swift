@@ -19,7 +19,7 @@ final class NewCategoryViewController: UIViewController {
     
     weak var delegate: NewCategoryDelegate?
     
-    private let textField: UITextField = {
+    private lazy var textField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название категории"
         textField.textColor = .designGray
@@ -39,7 +39,7 @@ final class NewCategoryViewController: UIViewController {
         return textField
     }()
     
-    private let saveButton: UIButton = {
+    private lazy var saveButton: UIButton = {
         let saveButton = UIButton(type: .system)
         saveButton.setTitle("Готово", for: .normal)
         
