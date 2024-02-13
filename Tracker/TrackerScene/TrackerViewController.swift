@@ -498,6 +498,7 @@ extension TrackerViewController {
     private func dayOfWeekString(for date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "E"
+        datePicker.locale = Locale(identifier: "ru_RU")
         return formatter.string(from: date)
     }
 }

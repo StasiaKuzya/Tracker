@@ -34,8 +34,8 @@ final class SplashViewController: UIViewController {
     
     private func switchToTabBarController() {
         guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }
-        let tabBarController = TabBarController()
-        window.rootViewController = tabBarController
+        let onboardingVC = OnboardingViewController()
+        window.rootViewController = onboardingVC
     }
     
     private func constraintsActivation() {
