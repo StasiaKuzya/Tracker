@@ -22,15 +22,15 @@ final class TrackerCategoryStore {
         self.init(context: context)
     }
     
-//    func addTracker(_ category: TrackerCategory) throws {
-//        let trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
-//        updateExistingTracker(trackerCategoryCoreData, with: category)
-//        try context.save()
-//    }
+    func addTracker(_ category: TrackerCategory) throws {
+        let trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
+        updateExistingTracker(trackerCategoryCoreData, with: category)
+        try context.save()
+    }
     
-//    func updateExistingTracker(_ trackerCategoryCoreData: TrackerCategoryCoreData, with category: TrackerCategory) {
-//        trackerCategoryCoreData.title = category.title
-//    }
+    func updateExistingTracker(_ trackerCategoryCoreData: TrackerCategoryCoreData, with category: TrackerCategory) {
+        trackerCategoryCoreData.title = category.title
+    }
 
     func fetchAllCategories() -> [TrackerCategory] {
         do {

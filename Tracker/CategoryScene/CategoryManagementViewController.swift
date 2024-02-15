@@ -19,6 +19,7 @@ final class CategoryManagementViewController: UIViewController {
     
     weak var categorySelectionDelegate: CategorySelectionDelegate?
     private var categories: [TrackerCategory] = []
+    private var viewModel: CategoryManagementViewModel?
     
     private let tableView: UITableView = {
         let tableView = UITableView()
@@ -81,15 +82,7 @@ final class CategoryManagementViewController: UIViewController {
         title = "Категории"
         view.backgroundColor = .white
         
-        let mockCategory = TrackerCategory(
-            title: "Важное",
-            trackers: [])
-        categories.append(mockCategory)
-        let mockCategor2 = TrackerCategory(
-            title: "Неважное",
-            trackers: [])
-        categories.append(mockCategor2)
-        
+        setupViewModel()
         setupViews()
         loadCategories()
     }
@@ -97,9 +90,9 @@ final class CategoryManagementViewController: UIViewController {
     // MARK: - Private Methods
     
     private func setupViews() {
-        view.addSubview(tableView)
         view.addSubview(emptyTrackerStateStackView)
         view.addSubview(addButton)
+        view.addSubview(tableView)
         
         tableView.layer.borderWidth = 1
         tableView.layer.borderColor = view.backgroundColor?.cgColor
@@ -150,6 +143,16 @@ final class CategoryManagementViewController: UIViewController {
         ])
     }
     
+    private func setupViewModel() {
+        viewModel = CategoryManagementViewModel(trackerCategoryStore: TrackerCategoryStore())
+
+        viewModel?.reloadTableViewClosure = { [weak self] in
+                self?.categories = self?.viewModel?.categories ?? []
+                self?.tableView.reloadData()
+        }
+        viewModel?.fetchCategories()
+    }
+    
     @objc private func addCategoryButtonTapped() {
         let newCategoryVC = NewCategoryViewController()
         newCategoryVC.delegate = self
@@ -195,7 +198,9 @@ extension CategoryManagementViewController: UITableViewDelegate {
 
 extension CategoryManagementViewController: NewCategoryDelegate {
     func didAddCategory(_ category: TrackerCategory) {
-        categories.append(category)
+        viewModel?.addCategoryToCD(category: category)
+        viewModel?.fetchCategories()
+        categories = viewModel?.categories ?? []
         loadCategories()
         emptyTrackerStateStackView.isHidden = true
     }
