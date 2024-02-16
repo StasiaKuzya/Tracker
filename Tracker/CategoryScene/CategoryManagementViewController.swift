@@ -75,6 +75,15 @@ final class CategoryManagementViewController: UIViewController {
     }()
     var tableCount: CGFloat?
     
+    init(viewModel: CategoryManagementViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -90,9 +99,9 @@ final class CategoryManagementViewController: UIViewController {
     // MARK: - Private Methods
     
     private func setupViews() {
+        view.addSubview(tableView)
         view.addSubview(emptyTrackerStateStackView)
         view.addSubview(addButton)
-        view.addSubview(tableView)
         
         tableView.layer.borderWidth = 1
         tableView.layer.borderColor = view.backgroundColor?.cgColor
@@ -124,8 +133,6 @@ final class CategoryManagementViewController: UIViewController {
     }
     
     private func loadCategories() {
-        // Загрузка категорий из хранилища
-        
         if categories.isEmpty {
             emptyTrackerStateStackView.isHidden = false
         } else {
@@ -139,6 +146,7 @@ final class CategoryManagementViewController: UIViewController {
         tableView.rowHeight = 75
         tableCount = CGFloat(categories.count)
         NSLayoutConstraint.activate([
+            tableView.bottomAnchor.constraint(lessThanOrEqualTo: addButton.topAnchor, constant: -16),
             tableView.heightAnchor.constraint(greaterThanOrEqualToConstant: 75 * CGFloat(categories.count)),
         ])
     }
@@ -146,9 +154,20 @@ final class CategoryManagementViewController: UIViewController {
     private func setupViewModel() {
         viewModel = CategoryManagementViewModel(trackerCategoryStore: TrackerCategoryStore())
 
-        viewModel?.reloadTableViewClosure = { [weak self] in
-                self?.categories = self?.viewModel?.categories ?? []
-                self?.tableView.reloadData()
+        viewModel?.didSelectCategoryClosure = { [weak self] category in
+            self?.categorySelectionDelegate?.didSelectCategory(category)
+        }
+
+        viewModel?.categoryManagementVCDimissedClosure = { [weak self] in
+            self?.categorySelectionDelegate?.categoryManagementVCDismissed(self!)
+        }
+
+        viewModel?.onCategoriesChange = { [weak self] categories in
+            self?.categories = categories
+            self?.tableView.reloadData()
+        }
+        viewModel?.onError = { error in
+            print("Error: \(error.localizedDescription)")
         }
         viewModel?.fetchCategories()
     }
@@ -187,10 +206,7 @@ extension CategoryManagementViewController: UITableViewDelegate {
         if let cell = tableView.cellForRow(at: indexPath) {
             cell.accessoryType = .checkmark
         }
-        
-        let selectedCategory = categories[indexPath.row]
-        categorySelectionDelegate?.didSelectCategory(selectedCategory)
-        categorySelectionDelegate?.categoryManagementVCDismissed(self)
+        viewModel?.didSelectCategory(at: indexPath.row)
     }
 }
 

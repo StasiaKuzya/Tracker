@@ -7,14 +7,20 @@
 
 import Foundation
 
+typealias CategoryBinding = ([TrackerCategory]) -> Void
+typealias ErrorBinding = (Error) -> Void
+
 class CategoryManagementViewModel {
 
+    var onCategoriesChange: CategoryBinding?
+    var onError: ErrorBinding?
+    
+    var didSelectCategoryClosure: ((TrackerCategory) -> Void)?
+    var categoryManagementVCDimissedClosure: (() -> Void)?
+    
     var reloadTableViewClosure: (() -> ())?
-    var categories: [TrackerCategory] = [] {
-        didSet {
-            reloadTableViewClosure?()
-        }
-    }
+    var categories: [TrackerCategory] = []
+
     private let trackerCategoryStore: TrackerCategoryStore
     
     init(trackerCategoryStore: TrackerCategoryStore) {
@@ -24,23 +30,22 @@ class CategoryManagementViewModel {
     func addCategoryToCD(category: TrackerCategory) {
         do {
             try trackerCategoryStore.addTracker(category)
-        } catch let error as NSError {
-            print("Failed to add tracker to Core Data: \(error)")
-            if let detailedErrors = error as? [NSError] {
-                for detailedError in detailedErrors {
-                    print("Detailed error: \(detailedError.userInfo)")
-                }
-            } else {
-                print("No detailed errors")
-            }
+            fetchCategories()
+        } catch {
+            onError?(error)
         }
     }
     
     func fetchCategories() {
-        categories = trackerCategoryStore.fetchAllCategories()
+        let fetchedCategories = trackerCategoryStore.fetchAllCategories()
+        categories = fetchedCategories
+        onCategoriesChange?(categories)
+
     }
     
     func didSelectCategory(at index: Int) {
-        // Обработка выбранной категории
+        let selectedCategory = categories[index]
+        didSelectCategoryClosure?(selectedCategory)
+        categoryManagementVCDimissedClosure?()
     }
 }
