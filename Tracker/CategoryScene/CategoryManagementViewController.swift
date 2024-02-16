@@ -159,7 +159,8 @@ final class CategoryManagementViewController: UIViewController {
         }
 
         viewModel?.categoryManagementVCDimissedClosure = { [weak self] in
-            self?.categorySelectionDelegate?.categoryManagementVCDismissed(self!)
+            guard let self = self else { return }
+            self.categorySelectionDelegate?.categoryManagementVCDismissed(self)
         }
 
         viewModel?.onCategoriesChange = { [weak self] categories in

@@ -346,6 +346,11 @@ extension NewHabitCreationViewController: UITextFieldDelegate {
         updateCreationButtonColor()
     }
     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
     private func updateCreationButtonColor() {
         if let
             trackerName = textField.text,

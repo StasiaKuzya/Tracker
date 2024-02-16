@@ -110,12 +110,14 @@ class OnboardingViewController: UIPageViewController {
     }
     
     private func switchToTabBarController() {
-        guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }
+        guard let window = UIApplication.shared.windows.first
+        else { return assertionFailure("Invalid Configuration") }
         let tabBarController = TabBarController()
         window.rootViewController = tabBarController
     }
     
     @objc private func startButtonTapped() {
+        UserDefaults.standard.set(true, forKey: "isOnboardingCompleted")
         switchToTabBarController()
     }
     

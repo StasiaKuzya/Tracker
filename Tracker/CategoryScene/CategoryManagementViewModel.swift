@@ -17,8 +17,7 @@ class CategoryManagementViewModel {
     
     var didSelectCategoryClosure: ((TrackerCategory) -> Void)?
     var categoryManagementVCDimissedClosure: (() -> Void)?
-    
-    var reloadTableViewClosure: (() -> ())?
+
     var categories: [TrackerCategory] = []
 
     private let trackerCategoryStore: TrackerCategoryStore
