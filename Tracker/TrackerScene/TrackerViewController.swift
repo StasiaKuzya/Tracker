@@ -16,7 +16,6 @@ final class TrackerViewController: UIViewController {
     private let trackerRecordStore = TrackerRecordStore()
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ru_RU")
         formatter.dateFormat = "dd.MM.yy"
         return formatter
     }()
@@ -39,7 +38,6 @@ final class TrackerViewController: UIViewController {
         if #available(iOS 14.0, *) {
             picker.preferredDatePickerStyle = .compact
         }
-        picker.locale = Locale(identifier: "ru_RU")
         return picker
     }()
     
@@ -409,7 +407,7 @@ extension TrackerViewController {
     
     private func updateTrackersForDate() {
         currentDate = datePicker.date
-        let selectedDayString = dayOfWeekString(for: currentDate)
+        let selectedDayNumber = dayOfWeekNumber(for: currentDate)
         let filtredText = (searchTextField.text ?? "").lowercased()
         
         // Извлекаем данные из Core Data
@@ -423,7 +421,7 @@ extension TrackerViewController {
                 
                 let textCondition = filtredText.isEmpty ||
                 tracker.trackerName.lowercased().contains(filtredText)
-                let trackerCondition = tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains { $0.shortName == selectedDayString } || tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty
+                let trackerCondition = tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains { $0.numberDay == selectedDayNumber } || tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty
                 
                 return textCondition && trackerCondition
             }
@@ -444,6 +442,13 @@ extension TrackerViewController {
         
         updateUIForTrackers(containTrackers)
         collectionView.reloadData()
+    }
+    
+    private func dayOfWeekNumber(for date: Date) -> Int {
+        let calendar = Calendar.current
+        let dayOfWeek = calendar.component(.weekday, from: date)
+        // Числовое представление дня недели, где вс - 1
+        return dayOfWeek
     }
     
     private func extractDataFromCD() {
@@ -493,12 +498,6 @@ extension TrackerViewController {
             emptyTrackerStateStackView.isHidden = true
             wrongTextSearchStackView.isHidden = false
         }
-    }
-    
-    private func dayOfWeekString(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "E"
-        return formatter.string(from: date)
     }
 }
 

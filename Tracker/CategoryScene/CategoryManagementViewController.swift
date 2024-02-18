@@ -19,6 +19,7 @@ final class CategoryManagementViewController: UIViewController {
     
     weak var categorySelectionDelegate: CategorySelectionDelegate?
     private var categories: [TrackerCategory] = []
+    private var viewModel: CategoryManagementViewModel?
     
     private let tableView: UITableView = {
         let tableView = UITableView()
@@ -74,6 +75,15 @@ final class CategoryManagementViewController: UIViewController {
     }()
     var tableCount: CGFloat?
     
+    init(viewModel: CategoryManagementViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -81,15 +91,7 @@ final class CategoryManagementViewController: UIViewController {
         title = "Категории"
         view.backgroundColor = .white
         
-        let mockCategory = TrackerCategory(
-            title: "Важное",
-            trackers: [])
-        categories.append(mockCategory)
-        let mockCategor2 = TrackerCategory(
-            title: "Неважное",
-            trackers: [])
-        categories.append(mockCategor2)
-        
+        setupViewModel()
         setupViews()
         loadCategories()
     }
@@ -131,8 +133,6 @@ final class CategoryManagementViewController: UIViewController {
     }
     
     private func loadCategories() {
-        // Загрузка категорий из хранилища
-        
         if categories.isEmpty {
             emptyTrackerStateStackView.isHidden = false
         } else {
@@ -146,8 +146,31 @@ final class CategoryManagementViewController: UIViewController {
         tableView.rowHeight = 75
         tableCount = CGFloat(categories.count)
         NSLayoutConstraint.activate([
+            tableView.bottomAnchor.constraint(lessThanOrEqualTo: addButton.topAnchor, constant: -16),
             tableView.heightAnchor.constraint(greaterThanOrEqualToConstant: 75 * CGFloat(categories.count)),
         ])
+    }
+    
+    private func setupViewModel() {
+        viewModel = CategoryManagementViewModel(trackerCategoryStore: TrackerCategoryStore())
+
+        viewModel?.didSelectCategoryClosure = { [weak self] category in
+            self?.categorySelectionDelegate?.didSelectCategory(category)
+        }
+
+        viewModel?.categoryManagementVCDimissedClosure = { [weak self] in
+            guard let self = self else { return }
+            self.categorySelectionDelegate?.categoryManagementVCDismissed(self)
+        }
+
+        viewModel?.onCategoriesChange = { [weak self] categories in
+            self?.categories = categories
+            self?.tableView.reloadData()
+        }
+        viewModel?.onError = { error in
+            print("Error: \(error.localizedDescription)")
+        }
+        viewModel?.fetchCategories()
     }
     
     @objc private func addCategoryButtonTapped() {
@@ -184,10 +207,7 @@ extension CategoryManagementViewController: UITableViewDelegate {
         if let cell = tableView.cellForRow(at: indexPath) {
             cell.accessoryType = .checkmark
         }
-        
-        let selectedCategory = categories[indexPath.row]
-        categorySelectionDelegate?.didSelectCategory(selectedCategory)
-        categorySelectionDelegate?.categoryManagementVCDismissed(self)
+        viewModel?.didSelectCategory(at: indexPath.row)
     }
 }
 
@@ -195,7 +215,9 @@ extension CategoryManagementViewController: UITableViewDelegate {
 
 extension CategoryManagementViewController: NewCategoryDelegate {
     func didAddCategory(_ category: TrackerCategory) {
-        categories.append(category)
+        viewModel?.addCategoryToCD(category: category)
+        viewModel?.fetchCategories()
+        categories = viewModel?.categories ?? []
         loadCategories()
         emptyTrackerStateStackView.isHidden = true
     }

@@ -13,6 +13,7 @@ final class IrreguralEventViewController: UIViewController {
     
     // MARK: -  Properties & Constants
     weak var delegate: TrackerDataDelegate?
+    private let categoryStore = TrackerCategoryStore()
     private var selectedIndexes: [Int: Int] = [:]
     private var selectedEmoji: String?
     private var selectedColor: UIColor?
@@ -47,7 +48,7 @@ final class IrreguralEventViewController: UIViewController {
         UIColor.colorSection17,
         UIColor.colorSection18
     ]
-//    private var selectedDays: [String] = []
+
     private var selectedDays: [WeekDay] = []
     
     private lazy var stackView: UIStackView = {
@@ -211,7 +212,8 @@ final class IrreguralEventViewController: UIViewController {
     
     private func showCategoryScreen() {
         textField.resignFirstResponder()
-        let categoryManagementVC = CategoryManagementViewController()
+        let viewModel = CategoryManagementViewModel(trackerCategoryStore: categoryStore)
+        let categoryManagementVC = CategoryManagementViewController(viewModel: viewModel)
         categoryManagementVC.categorySelectionDelegate = self
         let categoryManagementNC = UINavigationController(rootViewController: categoryManagementVC)
         present(categoryManagementNC, animated: true, completion: nil)
@@ -327,6 +329,11 @@ extension IrreguralEventViewController: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         textField.textColor = .designBlack
         updateCreationButtonColor()
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
     
     private func updateCreationButtonColor() {

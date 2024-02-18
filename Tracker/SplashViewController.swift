@@ -27,15 +27,32 @@ final class SplashViewController: UIViewController {
         
         view.addSubview(launchScreenImage)
         constraintsActivation()
-        switchToTabBarController()
+        switchToScene()
     }
     
     // MARK: -  Private Methods
     
+    private func switchToScene() {
+        let isOnboardingCompleted = UserDefaults.standard.bool(forKey: "isOnboardingCompleted")
+        if isOnboardingCompleted {
+            switchToTabBarController()
+        } else {
+            switchToOnboardingController()
+        }
+    }
+    
     private func switchToTabBarController() {
-        guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }
+        guard let window = UIApplication.shared.windows.first
+        else { return assertionFailure("Invalid Configuration") }
         let tabBarController = TabBarController()
         window.rootViewController = tabBarController
+    }
+    
+    private func switchToOnboardingController() {
+        guard let window = UIApplication.shared.windows.first
+        else { return assertionFailure("Invalid Configuration") }
+        let onboardingVC = OnboardingViewController()
+        window.rootViewController = onboardingVC
     }
     
     private func constraintsActivation() {
