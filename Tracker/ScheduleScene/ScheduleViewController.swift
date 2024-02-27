@@ -35,9 +35,12 @@ final class ScheduleViewController: UIViewController {
         return tableView
     }()
     
+    private let saveScheduleButtonTitle = NSLocalizedString("saveButton.title",
+                                      comment: "Text displayed on saveScheduleButtonTitle")
+    
     private lazy var saveButton: UIButton = {
         let saveButton = UIButton(type: .system)
-        saveButton.setTitle("Готово", for: .normal)
+        saveButton.setTitle(saveScheduleButtonTitle, for: .normal)
         saveButton.isEnabled = false
         saveButton.titleLabel?.tintColor = .designWhite
         saveButton.setTitleColor(.designWhite, for: .normal)
@@ -57,7 +60,8 @@ final class ScheduleViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Расписание"
+        title = NSLocalizedString("scheduleLabelTitle.title",
+                                  comment: "Text displayed on scheduleLabelTitle")
         view.backgroundColor = .white
         
         setDaysOfWeek()
@@ -124,7 +128,7 @@ extension ScheduleViewController: UITableViewDataSource {
         _ = shortDaysOfWeek[indexPath.row]
 
         cell.selectionStyle = .none
-        cell.configure(title: day.rawValue)
+        cell.configure(title: day.localizedString())
         cell.switchControl.isOn = selectedDays.contains(day)
         cell.switchControl.tag = indexPath.row
 

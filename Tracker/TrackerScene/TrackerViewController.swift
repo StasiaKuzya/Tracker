@@ -22,7 +22,8 @@ final class TrackerViewController: UIViewController {
     
     private lazy var searchTextField: UISearchTextField = {
         let textField = UISearchTextField()
-        textField.placeholder = "Поиск"
+        textField.placeholder = NSLocalizedString("searchTextField.title",
+                                                  comment: "Text displayed on searchTextField, main scene")
         textField.backgroundColor = .designBackground
         textField.textColor = .designBlack
         textField.font = UIFont.systemFont(ofSize: 17, weight: .medium)
@@ -60,7 +61,8 @@ final class TrackerViewController: UIViewController {
     
     private let emptyTrackerStateLabel: UILabel = {
         let label = UILabel()
-        label.text = "Что будем отслеживать?"
+        label.text = NSLocalizedString("emptyState.title",
+                                       comment: "Text displayed on emptyState, main scene")
         label.textAlignment = .center
         label.textColor = .designBlack
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -87,7 +89,8 @@ final class TrackerViewController: UIViewController {
     
     private let ewrongTextSearchStackViewLabel: UILabel = {
         let label = UILabel()
-        label.text = "Ничего не найдено?"
+        label.text = NSLocalizedString("wrongSearchState.title",
+                                       comment: "Text displayed on wrongSearchState, main scene")
         label.textAlignment = .center
         label.textColor = .designBlack
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -161,7 +164,8 @@ final class TrackerViewController: UIViewController {
             
             navigationController.navigationBar.prefersLargeTitles = true
             navigationItem.largeTitleDisplayMode = .always
-            title = "Трекеры"
+            title = NSLocalizedString("mainLargeTitle.title",
+                                      comment: "Text displayed on mainLargeTitle, main scene")
             navigationController.navigationBar.largeTitleTextAttributes = [
                 .foregroundColor: UIColor.designBlack,
                 .font: UIFont.systemFont(ofSize: 34, weight: .bold)

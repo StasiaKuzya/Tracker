@@ -157,7 +157,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         nameLabel.text = tracker.trackerName
         colorView.backgroundColor = tracker.trackerColor
         button.tintColor = tracker.trackerColor
-        daysCountLabel.text = "\(completedDays) дней"
+        daysCountLabel.text = String.localizedStringWithFormat(
+            NSLocalizedString(
+                "numberOfTasks",
+                comment: "Number of daone trackers"),
+            completedDays
+        )
         
         if completedForDate {
             let image = UIImage(named: "DoneButton")

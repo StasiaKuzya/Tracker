@@ -1,0 +1,67 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Анастасия on 25.02.2024.
+  
+*/
+// TabBar
+"tabBarItem1.title" = "Trackers";
+"tabBarItem2.title" = "Statistics";
+
+// TrackerMainScene
+"searchTextField.title" = "Search";
+"emptyState.title" = "What are we going to track?";
+"wrongSearchState.title" = "Nothing was found";
+"mainLargeTitle.title" = "Trackers";
+
+// TypeSelectionScene
+"habitButton.title" = "Habit";
+"irregularEventButton.title" = "Irregural event";
+"trackerTypeSelection.title" = "Tracker creation";
+"newHabitCreationScene.title" = "New habit";
+"irreguralEventVCScene.title" = "New irregural event";
+
+// Habit & IrreguralEvent Scene
+"categoryTable.title" = "Category";
+"scheduleTable.title" = "Schedule";
+"nameTrackerTextField.title" = "Type the tracker's name";
+"cancelButton.title" = "Cancel";
+"creationButton.title" = "Create";
+"colorsHeaderCV.title" = "Colors";
+
+// CategoryManagementScene
+"emptyTrackerStateLabel.title" = "Habits and events can be\ncombined in meaning";
+"addCategoryButton.title" = "Add a category";
+"categoryLabelTitle.title" = "Categories";
+
+// NewCategoryScene
+"newCategoryTextField.title" = "Type the category's name";
+"newCategoryLabelTitle.title" = "New category";
+
+// ScheduleScene
+"scheduleLabelTitle.title" = "Schedule";
+"scheduleEveryDay.title" = "Every day";
+
+"saveButton.title" = "Submit";
+
+// OnboardingScene
+"OnboardingLabel1.title" = "Track only what you want";
+"OnboardingLabel2.title" = "Even it's not gallons of water and yoga";
+"onboardingStartButton.title" = "Wow what technology";
+
+"Понедельник" = "Monday";
+"Вторник" = "Tuesday";
+"Среда" = "Wednesday";
+"Четверг" = "Thursday";
+"Пятница" = "Friday";
+"Суббота" = "Saturday";
+"Воскресенье" = "Sunday";
+
+"Пн" = "Mon";
+"Вт" = "Tue";
+"Ср" = "Wed";
+"Чт" = "Thu";
+"Пт" = "Fri";
+"Сб" = "Sat";
+"Вс" = "Sun";

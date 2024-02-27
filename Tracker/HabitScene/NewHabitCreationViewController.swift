@@ -23,7 +23,13 @@ final class NewHabitCreationViewController: UIViewController {
     private var selectedEmoji: String?
     private var selectedColor: UIColor?
     
-    private var words: [(title: String, subtitle: String?)] = [("Категория", nil), ("Расписание", nil)]
+    private var words: [(title: String, subtitle: String?)] = [
+        (NSLocalizedString("categoryTable.title",
+                            comment: "Text displayed on categoryTable"),
+         nil),
+        (NSLocalizedString("scheduleTable.title",
+                           comment: "Text displayed on scheduleTable"),
+         nil)]
     
     private let maxLength = 38
     
@@ -68,7 +74,8 @@ final class NewHabitCreationViewController: UIViewController {
     
     private let textField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
+        textField.placeholder = NSLocalizedString("nameTrackerTextField.title",
+                                                  comment: "Text displayed on nameTrackerTextFieldTitle")
         textField.textColor = .designGray
         textField.backgroundColor = .designBackground
         textField.font = UIFont.systemFont(ofSize: 17)
@@ -113,9 +120,15 @@ final class NewHabitCreationViewController: UIViewController {
         return stackView
     }()
     
+    private let cancelButtonTitle = NSLocalizedString("cancelButton.title",
+                              comment: "Text displayed on cancelButtonTitle")
+    
+    private let creationButtonTitle = NSLocalizedString("creationButton.title",
+                              comment: "Text displayed on creationButtonTitle")
+    
     private lazy var cancelButton: UIButton = {
         let cancelButton = UIButton(type: .system)
-        cancelButton.setTitle("Отменить", for: .normal)
+        cancelButton.setTitle(cancelButtonTitle, for: .normal)
         
         cancelButton.titleLabel?.tintColor = .designRed
         cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
@@ -133,7 +146,7 @@ final class NewHabitCreationViewController: UIViewController {
     
     private lazy var creationButton: UIButton = {
         let creationButton = UIButton(type: .system)
-        creationButton.setTitle("Создать", for: .normal)
+        creationButton.setTitle(creationButtonTitle, for: .normal)
         
         creationButton.titleLabel?.tintColor = .designWhite
         creationButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
@@ -390,10 +403,11 @@ extension NewHabitCreationViewController: CategorySelectionDelegate {
 extension NewHabitCreationViewController: ScheduleSelectionDelegate {
     func didSelectDays(_ days: [WeekDay]) {
         selectedDays = days
-        let shortDayNames = days.map { $0.shortName }
+        let shortDayNames = days.map { $0.localizedShortString() }
         
         if days.count == 7 {
-            words[1].subtitle = "Каждый день"
+            words[1].subtitle = NSLocalizedString("scheduleEveryDay.title",
+                                                  comment: "Text displayed on scheduleEveryDayTitle")
         } else {
             words[1].subtitle = shortDayNames.joined(separator: ", ")
         }
@@ -460,8 +474,10 @@ extension NewHabitCreationViewController: UICollectionViewDataSource {
         
         let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as! SupplementaryColorEmojiView
         if collectionView == self.collectionView {
+            let colorsHeader = NSLocalizedString("colorsHeaderCV.title",
+                                  comment: "Text displayed on colorsHeader")
             if kind == UICollectionView.elementKindSectionHeader {
-                view.titleLabel.text = indexPath.section == 0 ? "Emoji" : "Цвета"
+                view.titleLabel.text = indexPath.section == 0 ? "Emoji" : colorsHeader
             }
         }
         

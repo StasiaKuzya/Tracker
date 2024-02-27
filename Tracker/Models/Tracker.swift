@@ -80,4 +80,14 @@ extension WeekDay {
         }
         return day
     }
+    
+    func localizedString() -> String {
+        return NSLocalizedString(self.rawValue, comment: "")
+    }
+    
+    func localizedShortString() -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale.current
+        return formatter.shortWeekdaySymbols[numberDay - 1]
+    }
 }

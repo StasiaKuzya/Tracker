@@ -50,7 +50,8 @@ final class CategoryManagementViewController: UIViewController {
     
     private let emptyTrackerStateLabel: UILabel = {
         let label = UILabel()
-        label.text = "Привычки и события можно\nобъединить по смыслу"
+        label.text = NSLocalizedString("emptyTrackerStateLabel.title",
+                                       comment: "Text displayed on emptyTrackerStateLabel, categoryScene")
         label.textAlignment = .center
         label.numberOfLines = 2
         label.textColor = .designBlack
@@ -58,10 +59,12 @@ final class CategoryManagementViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+   private let addCategoryButtonTitle = NSLocalizedString("addCategoryButton.title",
+                        comment: "Text displayed on addCategoryButtonTitle")
     
     private lazy var addButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(addCategoryButtonTitle, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         button.backgroundColor = .designBlack
         button.setTitleColor(.white, for: .normal)
@@ -88,7 +91,8 @@ final class CategoryManagementViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Категории"
+        title = NSLocalizedString("categoryLabelTitle.title",
+                                  comment: "Text displayed on categoryLabelTitle")
         view.backgroundColor = .white
         
         setupViewModel()
