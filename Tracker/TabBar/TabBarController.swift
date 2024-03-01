@@ -47,7 +47,15 @@ final class TabBarController: UITabBarController {
         
         tabBar.tintColor = .designBlue
         
-        tabBar.layer.borderWidth = 1.0
-        tabBar.layer.borderColor = UIColor.lightGray.cgColor
+        let tabBarLineColor = UIColor { (traits: UITraitCollection) -> UIColor in
+            if traits.userInterfaceStyle == .light {
+                return UIColor.designLightGray
+            } else {
+                return .systemBackground
+            }
+        }
+        let borderView = UIView(frame: CGRect(x: 0, y: 0, width: tabBar.frame.size.width, height: 2.0))
+        borderView.backgroundColor = tabBarLineColor
+        tabBar.addSubview(borderView)
     }
 }

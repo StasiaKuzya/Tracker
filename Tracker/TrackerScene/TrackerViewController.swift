@@ -129,7 +129,7 @@ final class TrackerViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .designWhite
+        view.backgroundColor = .systemBackground
         
         addTBViews()
         addNCViews()

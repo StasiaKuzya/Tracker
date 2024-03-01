@@ -67,7 +67,7 @@ final class CategoryManagementViewController: UIViewController {
         button.setTitle(addCategoryButtonTitle, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         button.backgroundColor = .designBlack
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(.designWhite, for: .normal)
         button.layer.cornerRadius = 16
         button.addTarget(
             self,
@@ -93,27 +93,37 @@ final class CategoryManagementViewController: UIViewController {
         super.viewDidLoad()
         title = NSLocalizedString("categoryLabelTitle.title",
                                   comment: "Text displayed on categoryLabelTitle")
-        view.backgroundColor = .white
+        view.backgroundColor = .designWhite
         
         setupViewModel()
         setupViews()
         loadCategories()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        addUpperAndLowerBorders(to: tableView)
+    }
+    
     // MARK: - Private Methods
+    
+    private func addUpperAndLowerBorders(to view: UIView) {
+        let upperBorderView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 1.0))
+        upperBorderView.backgroundColor = .designWhite
+        view.addSubview(upperBorderView)
+        
+        let lowerBorderView = UIView(frame: CGRect(x: 0, y: view.frame.height - 1, width: view.frame.size.width, height: 1.0))
+        lowerBorderView.backgroundColor = .designWhite
+        view.addSubview(lowerBorderView)
+    }
     
     private func setupViews() {
         view.addSubview(tableView)
         view.addSubview(emptyTrackerStateStackView)
         view.addSubview(addButton)
         
-        tableView.layer.borderWidth = 1
-        tableView.layer.borderColor = view.backgroundColor?.cgColor
-        
         tableView.layer.masksToBounds = true
         tableView.layer.cornerRadius = 16
-        tableView.layer.borderWidth = 1
-        tableView.layer.borderColor = UIColor.designWhite.cgColor
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),

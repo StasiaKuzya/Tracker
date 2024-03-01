@@ -67,7 +67,7 @@ final class NewCategoryViewController: UIViewController {
         super.viewDidLoad()
         title = NSLocalizedString("newCategoryLabelTitle.title",
                                   comment: "Text displayed on newCategoryLabelTitle")
-        view.backgroundColor = .white
+        view.backgroundColor = .designWhite
         
         textField.delegate = self
         setupViews()

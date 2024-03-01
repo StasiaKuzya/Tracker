@@ -72,7 +72,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .white
+        view.backgroundColor = .designWhite
         self.title = NSLocalizedString("trackerTypeSelection.title",
                                        comment: "Text displayed on trackerTypeSelectionTitle")
         navigationController?.isNavigationBarHidden = false

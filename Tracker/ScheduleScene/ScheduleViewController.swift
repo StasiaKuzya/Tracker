@@ -62,14 +62,28 @@ final class ScheduleViewController: UIViewController {
         super.viewDidLoad()
         title = NSLocalizedString("scheduleLabelTitle.title",
                                   comment: "Text displayed on scheduleLabelTitle")
-        view.backgroundColor = .white
+        view.backgroundColor = .designWhite
         
         setDaysOfWeek()
         
         setupViews()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        addUpperAndLowerBorders(to: tableView)
+    }
+    
     // MARK: - Private Methods
+    private func addUpperAndLowerBorders(to view: UIView) {
+        let upperBorderView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 1.0))
+        upperBorderView.backgroundColor = .designWhite
+        view.addSubview(upperBorderView)
+        
+        let lowerBorderView = UIView(frame: CGRect(x: 0, y: view.frame.height - 1, width: view.frame.size.width, height: 1.0))
+        lowerBorderView.backgroundColor = .designWhite
+        view.addSubview(lowerBorderView)
+    }
     
     private func setDaysOfWeek() {
         daysOfWeek = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
@@ -79,9 +93,6 @@ final class ScheduleViewController: UIViewController {
     private func setupViews() {
         view.addSubview(tableView)
         view.addSubview(saveButton)
-        
-        tableView.layer.borderWidth = 1
-        tableView.layer.borderColor = view.backgroundColor?.cgColor
         
         tableView.layer.masksToBounds = true
         tableView.layer.cornerRadius = 16

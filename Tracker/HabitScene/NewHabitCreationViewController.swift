@@ -95,6 +95,7 @@ final class NewHabitCreationViewController: UIViewController {
         tableView.layer.cornerRadius = 16
         tableView.separatorStyle = .singleLine
         tableView.layer.masksToBounds = true
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
     
@@ -175,7 +176,7 @@ final class NewHabitCreationViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .designWhite
         
         setupViews()
         tableView.reloadData()
@@ -183,17 +184,24 @@ final class NewHabitCreationViewController: UIViewController {
         didSelectDays([])
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        addLowerBorder(to: tableView)
+    }
+
     // MARK: - Private Methods
+    
+    private func addLowerBorder(to view: UIView) {
+        let borderLowerView = UIView(frame: CGRect(x: 0, y: view.frame.height - 1, width: view.frame.size.width, height: 1.0))
+        borderLowerView.backgroundColor = .designWhite
+        view.addSubview(borderLowerView)
+    }
     
     private func setupViews() {
         view.addSubview(stackView)
         view.addSubview(collectionView)
         view.addSubview(stackViewH)
         
-        tableView.layer.borderWidth = 1
-        tableView.layer.borderColor = view.backgroundColor?.cgColor
-        
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             stackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),

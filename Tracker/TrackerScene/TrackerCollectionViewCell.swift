@@ -57,7 +57,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private let nameLabel: UILabel = {
         let nameLabel = UILabel()
         nameLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        nameLabel.textColor = .designWhite
+        nameLabel.textColor = .white
         nameLabel.numberOfLines = 2
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         return nameLabel
@@ -85,8 +85,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let button = UIButton(type: .system)
         let addButtonImage = UIImage(named: "AddButton")
         button.setImage(addButtonImage, for: .normal)
-        //        button.sizeToFit()
-        //        button.tintColor = .designBlue
         button.addTarget(
             self,
             action: #selector(buttonTapped),
@@ -99,7 +97,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let checkBoxImageView = UIImageView()
         checkBoxImageView.contentMode = .scaleAspectFit
         checkBoxImageView.image = UIImage(named: "CheckBox")?.withRenderingMode(.alwaysTemplate)
-        checkBoxImageView.tintColor = .designWhite
+        checkBoxImageView.tintColor = .white
         checkBoxImageView.translatesAutoresizingMaskIntoConstraints = false
         return checkBoxImageView
     }()
