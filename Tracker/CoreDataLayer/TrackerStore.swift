@@ -43,11 +43,6 @@ final class TrackerStore: NSObject {
     func addTracker(_ tracker: Tracker) throws {
         let trackerCoreData = TrackerCoreData(context: context)
         updateExistingTracker(trackerCoreData, with: tracker)
-        do {
-            try context.save()
-        } catch {
-            print("Error saving context: \(error)")
-        }
     }
     
     func updateExistingTracker(_ trackerCoreData: TrackerCoreData, with tracker: Tracker) {
@@ -75,6 +70,13 @@ final class TrackerStore: NSObject {
         trackerCoreData.category = trackerCoreData.trackerCategoryCoreData?.title
         
         trackerCoreData.isDone = ((trackerCoreData.trackerRecordCoreDate?.contains(tracker.trackerId)) != nil)
+        
+        // Сохраняем новый трекер или изменения в уже существующем
+        do {
+             try context.save()
+         } catch {
+             print("Error saving context: \(error)")
+         }
     }
     
     func createCategory(title: String) -> TrackerCategoryCoreData {
@@ -95,6 +97,23 @@ final class TrackerStore: NSObject {
         fetchRequest.predicate = NSPredicate(format: "trackerId == %@", trackerId as CVarArg)
         
         return try context.fetch(fetchRequest).first
+    }
+
+    func deleteTracker(_ tracker: Tracker) throws {
+        let request = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
+        request.predicate = NSPredicate(
+            format: "trackerId == %@",
+            tracker.trackerId as CVarArg)
+        do {
+            let trackerCoreData = try context.fetch(request)
+            if let firstTrackerCoreData = trackerCoreData.first {
+                context.delete(firstTrackerCoreData)
+                try context.save()
+            }
+        } catch {
+            print("Failed to delete tracker record: \(error)")
+            throw error
+        }
     }
 }
 

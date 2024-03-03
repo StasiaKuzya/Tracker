@@ -79,4 +79,15 @@ extension TrackerRecordStore {
             throw error
         }
     }
+    
+    func countTrackerRecords(forTrackerId trackerId: UUID) throws -> Int {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "trackerID == %@", trackerId as CVarArg)
+        do {
+             let count = try context.count(for: fetchRequest)
+             return count
+         } catch {
+             throw error
+         }
+    }
 }

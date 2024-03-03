@@ -359,6 +359,104 @@ extension TrackerViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         
     }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        contextMenuConfigurationForItemsAt indexPaths: [IndexPath],
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard indexPaths.count > 0 else {
+            return nil
+        }
+        
+        let indexPath = indexPaths[0]
+        
+        return UIContextMenuConfiguration(actionProvider: { actions in
+            let pinTitle = NSLocalizedString("pinTracker.title",
+                                            comment: "Text displayed on pinTracker, main scene")
+            let editTitle = NSLocalizedString("editTracker.title",
+                                            comment: "Text displayed on editTracker, main scene")
+            let deleteTitle = NSLocalizedString("deleteTracker.title",
+                                            comment: "Text displayed on deleteTracker, main scene")
+            
+            let deleteAction = UIAction(title: deleteTitle) { [weak self] _ in
+                self?.deleteTracker(indexPath: indexPath)
+            }
+            deleteAction.attributes = .destructive
+            
+            return UIMenu(children: [
+                UIAction(title: pinTitle) { [weak self] _ in
+                    self?.pinTracker(indexPath: indexPath)
+                },
+                UIAction(title: editTitle) { [weak self] _ in
+                    self?.editTracker(indexPath: indexPath)
+                },
+                deleteAction
+            ])
+        })
+    }
+    
+    // Pin Tracker Logic
+    private func pinTracker(indexPath: IndexPath) {
+        updateUIAfterActions()
+    }
+    
+    // Edit Tracker Logic
+    private func editTracker(indexPath: IndexPath) {
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
+        showEditTrackerScreen(for: tracker)
+        updateUIAfterActions()
+    }
+    
+    private func showEditTrackerScreen(for tracker: Tracker) {
+        let editTrackerVC = EditTrackerViewController(tracker: tracker)
+        editTrackerVC.delegate = self
+        let editTrackerNC = UINavigationController(rootViewController: editTrackerVC)
+        present(editTrackerNC, animated: true, completion: nil)
+    }
+    
+    // Delete Tracker Logic
+    private func deleteTracker(indexPath: IndexPath) {
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
+        showDeleteAlert(tracker: tracker)
+    }
+    
+    private func showDeleteAlert(tracker: Tracker) {
+        let alertModel = AlertModel(
+            title: NSLocalizedString("alertDeleteTracker.title",
+                                     comment: "Text displayed on alertDeleteTracker, main scene"),
+            message: nil,
+            primaryButton: AlertButton(
+                buttonText: NSLocalizedString("alertDeleteButton1.title",
+                                              comment: "Text displayed on alertDeleteButton1, main scene"),
+                completion: { [weak self] in
+                    self?.deleteTrackersToCD(tracker: tracker)
+                    self?.updateUIAfterActions()
+                }
+            ),
+            additionalButtons: [AlertButton(
+                buttonText: NSLocalizedString("alertDeleteButton2.title",
+                                              comment: "Text displayed on alertDeleteButton2, main scene"),
+                completion: nil
+            )]
+        )
+        
+        AlertPresenter.showAlert(alertModel: alertModel, delegate: self)
+    }
+    
+    private func deleteTrackersToCD(tracker: Tracker) {
+        do {
+            try trackerStore.deleteTracker(tracker)
+        } catch let error as NSError {
+            print("Failed to delete tracker from Core Data: \(error)")
+        }
+    }
+    
+    private func updateUIAfterActions() {
+        // Обновление UI
+        updateTrackersForDate()
+        collectionView.reloadData()
+    }
 }
 
 // MARK: - TrackerVCDataDelegate
@@ -381,8 +479,7 @@ extension TrackerViewController: TrackerVCDataDelegate {
         }
         
         // Обновление UI
-        updateTrackersForDate()
-        collectionView.reloadData()
+        updateUIAfterActions()
     }
     
     private func addTrackersToCD(tracker: Tracker) {
@@ -542,6 +639,34 @@ extension TrackerViewController: TrackerCellDelegate {
             try trackerRecordStore.deleteTrackerRecord(trackerRecord)
         } catch let error as NSError {
             print("Failed to add tracker to Core Data: \(error)")
+        }
+    }
+}
+
+// MARK: - Extension TrackerEditDataDelegate
+
+extension TrackerViewController: TrackerEditDataDelegate {
+    func editTrackerVCDismissed(_ vc: EditTrackerViewController) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func didUpdateEditedTracker(_ updatedTracker: Tracker) {
+        updateTracker(updatedTracker)
+        updateUIAfterActions()
+    }
+    
+    func updateTracker(_ editedTracker: Tracker) {
+        do {
+            guard let trackerCoreData = try trackerStore.fetchTrackerByIdForRecords(editedTracker.trackerId) else {
+                print("Трекер с ID \(editedTracker.trackerId) не найден в Core Data")
+                return
+            }
+            // Внесены изменения в свойства объекта трекера в Core Data
+            trackerStore.updateExistingTracker(trackerCoreData, with: editedTracker)
+            print("Данные по трекеру успешно обновлены")
+            
+        } catch {
+            print("Ошибка при обновлении данных по трекеру: \(error)")
         }
     }
 }

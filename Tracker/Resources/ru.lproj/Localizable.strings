@@ -14,6 +14,12 @@
 "emptyState.title" = "Что будем отслеживать?";
 "wrongSearchState.title" = "Ничего не найдено?";
 "mainLargeTitle.title" = "Трекеры";
+"pinTracker.title" = "Закрепить";
+"editTracker.title" = "Редактировать";
+"deleteTracker.title" = "Удалить";
+"alertDeleteTracker.title" = "Уверены что хотите удалить трекер?";
+"alertDeleteButton1.title" = "Удалить";
+"alertDeleteButton2.title" = "Отменить";
 
 // TypeSelectionScene
 "habitButton.title" = "Привычка";
@@ -29,6 +35,7 @@
 "cancelButton.title" = "Отменить";
 "creationButton.title" = "Создать";
 "colorsHeaderCV.title" = "Цвета";
+"editTrackerVC.title" = "Редактирование привычки";
 
 // CategoryManagementScene
 "emptyTrackerStateLabel.title" = "Привычки и события можно\nобъединить по смыслу";
