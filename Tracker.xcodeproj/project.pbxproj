@@ -10,6 +10,8 @@
 		5A0834C52B93AD2200317F5D /* AlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0834C42B93AD2200317F5D /* AlertPresenter.swift */; };
 		5A0834C72B93AD3500317F5D /* AlertModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0834C62B93AD3500317F5D /* AlertModel.swift */; };
 		5A0834CA2B93B7A200317F5D /* EditTrackerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0834C92B93B7A200317F5D /* EditTrackerViewController.swift */; };
+		5A0834CC2B950CFD00317F5D /* StatisticsCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0834CB2B950CFD00317F5D /* StatisticsCollectionViewCell.swift */; };
+		5A0834CE2B965C2500317F5D /* CellStatData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0834CD2B965C2500317F5D /* CellStatData.swift */; };
 		5A1994D02B61ACC200024477 /* IrregularEventViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1994CF2B61ACC200024477 /* IrregularEventViewController.swift */; };
 		5A1994F62B68202200024477 /* TrackerCoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5A1994F42B68202100024477 /* TrackerCoreData.xcdatamodeld */; };
 		5A1995082B6A8B8100024477 /* TrackerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1995072B6A8B8100024477 /* TrackerStore.swift */; };
@@ -51,6 +53,8 @@
 		5A0834C42B93AD2200317F5D /* AlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPresenter.swift; sourceTree = "<group>"; };
 		5A0834C62B93AD3500317F5D /* AlertModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertModel.swift; sourceTree = "<group>"; };
 		5A0834C92B93B7A200317F5D /* EditTrackerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTrackerViewController.swift; sourceTree = "<group>"; };
+		5A0834CB2B950CFD00317F5D /* StatisticsCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsCollectionViewCell.swift; sourceTree = "<group>"; };
+		5A0834CD2B965C2500317F5D /* CellStatData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellStatData.swift; sourceTree = "<group>"; };
 		5A1994CF2B61ACC200024477 /* IrregularEventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IrregularEventViewController.swift; sourceTree = "<group>"; };
 		5A1994F52B68202100024477 /* TrackerCoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TrackerCoreData.xcdatamodel; sourceTree = "<group>"; };
 		5A1995072B6A8B8100024477 /* TrackerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerStore.swift; sourceTree = "<group>"; };
@@ -216,6 +220,7 @@
 			isa = PBXGroup;
 			children = (
 				5A6DA0E72B4704AD008A2111 /* StatisticsViewController.swift */,
+				5A0834CB2B950CFD00317F5D /* StatisticsCollectionViewCell.swift */,
 			);
 			path = StatisticsScene;
 			sourceTree = "<group>";
@@ -231,6 +236,7 @@
 		5AFE63B02B4BF0DA0076EC5E /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				5A0834CD2B965C2500317F5D /* CellStatData.swift */,
 				5AFE63D22B57126B0076EC5E /* GeometricParams.swift */,
 				5AFE63B12B4BF0ED0076EC5E /* Tracker.swift */,
 				5AFE63B32B4BF0F80076EC5E /* TrackerCategory.swift */,
@@ -349,6 +355,7 @@
 				5AFE63C22B52E7F90076EC5E /* NewCategoryViewController.swift in Sources */,
 				5A0834CA2B93B7A200317F5D /* EditTrackerViewController.swift in Sources */,
 				5AFE63CB2B53FD100076EC5E /* ScheduleTableViewCell.swift in Sources */,
+				5A0834CC2B950CFD00317F5D /* StatisticsCollectionViewCell.swift in Sources */,
 				5A6DA0D32B46F800008A2111 /* TrackerViewController.swift in Sources */,
 				5AFE63C92B53FC540076EC5E /* ScheduleViewController.swift in Sources */,
 				5AFE63CD2B5597C30076EC5E /* SupplementaryTrackerView.swift in Sources */,
@@ -364,6 +371,7 @@
 				5A19950A2B6A8B8D00024477 /* TrackerCategoryStore.swift in Sources */,
 				5AFE63BC2B51D9D80076EC5E /* NewHabitCreationViewController.swift in Sources */,
 				5A8C13592B7D1BE300527FC7 /* CategoryManagementViewModel.swift in Sources */,
+				5A0834CE2B965C2500317F5D /* CellStatData.swift in Sources */,
 				5AFE63D12B5711AE0076EC5E /* SupplementaryColorEmojiView.swift in Sources */,
 				5A0834C72B93AD3500317F5D /* AlertModel.swift in Sources */,
 				5AFE63B62B4BF1030076EC5E /* TrackerRecord.swift in Sources */,

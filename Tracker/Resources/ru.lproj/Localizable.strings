@@ -57,3 +57,10 @@
 "OnboardingLabel2.title" = "Даже если это не литры воды и йога";
 "onboardingStartButton.title" = "Вот это технологии";
 
+// StatisticsScene
+"statLargeTitle.title" = "Статистика";
+"statEmptyState.title" = "Анализировать пока нечего";
+"statInfo0.title" = "Лучший период";
+"statInfo1.title" = "Идеальные дни";
+"statInfo2.title" = "Трекеров завершено";
+"statInfo3.title" = "Среднее значение";

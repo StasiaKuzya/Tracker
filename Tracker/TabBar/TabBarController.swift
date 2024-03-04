@@ -32,11 +32,12 @@ final class TabBarController: UITabBarController {
                                                               selectedImage: nil)
         
         let statisticsViewController = StatisticsViewController()
-        statisticsViewController.tabBarItem = UITabBarItem(title: tabBarItem2,
+        let statisticsNavigationController = UINavigationController(rootViewController: statisticsViewController)
+        statisticsNavigationController.tabBarItem = UITabBarItem(title: tabBarItem2,
                                                            image: UIImage(named: "statTabBarImage"),
                                                            selectedImage: nil)
         
-        self.viewControllers = [trackerNavigationController, statisticsViewController]
+        self.viewControllers = [trackerNavigationController, statisticsNavigationController]
     }
     
     private func setupAppearance() {

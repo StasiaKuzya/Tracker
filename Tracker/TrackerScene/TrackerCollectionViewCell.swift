@@ -20,7 +20,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private var trackerId: UUID?
     private var indexPath: IndexPath?
     
-    private let colorView: UIView = {
+    let colorView: UIView = {
         var colorView = UIView()
         colorView.layer.cornerRadius = 16
         colorView.translatesAutoresizingMaskIntoConstraints = false

@@ -72,3 +72,11 @@
 "Пт" = "Fri";
 "Сб" = "Sat";
 "Вс" = "Sun";
+
+// StatisticsScene
+"statLargeTitle.title" = "Statistics";
+"statEmptyState.title" = "Nothing to analyse";
+"statInfo0.title" = "Best period";
+"statInfo1.title" = "Perfect days";
+"statInfo2.title" = "Completed trackers";
+"statInfo3.title" = "Average";
