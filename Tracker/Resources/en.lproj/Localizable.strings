@@ -15,11 +15,13 @@
 "wrongSearchState.title" = "Nothing was found";
 "mainLargeTitle.title" = "Trackers";
 "pinTracker.title" = "Pin";
+"unpinTracker.title" = "Unpin";
 "editTracker.title" = "Edit";
 "deleteTracker.title" = "Delete";
 "alertDeleteTracker.title" = "Do you really want to delete the tracker?";
 "alertDeleteButton1.title" = "Delete";
 "alertDeleteButton2.title" = "Cancel";
+"pinnedCategory.title" = "Pinned";
 
 // TypeSelectionScene
 "habitButton.title" = "Habit";

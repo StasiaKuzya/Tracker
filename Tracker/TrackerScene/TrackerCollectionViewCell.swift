@@ -54,6 +54,15 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return emojiLabel
     }()
     
+    private let pinImageView: UIImageView = {
+        let pinImageView = UIImageView()
+        pinImageView.contentMode = .scaleAspectFit
+        pinImageView.image = UIImage(named: "PinImage")?.withRenderingMode(.alwaysTemplate)
+        pinImageView.tintColor = .white
+        pinImageView.translatesAutoresizingMaskIntoConstraints = false
+        return pinImageView
+    }()
+    
     private let nameLabel: UILabel = {
         let nameLabel = UILabel()
         nameLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -116,6 +125,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(colorView)
         contentView.addSubview(stackViewH)
         emojiView.addSubview(emojiLabel)
+        colorView.addSubview(pinImageView)
         // Настройка констрейнтов
         NSLayoutConstraint.activate([
             colorView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -138,6 +148,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             stackViewH.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
             stackViewH.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
             stackViewH.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            
+            pinImageView.centerYAnchor.constraint(equalTo: emojiView.centerYAnchor),
+            pinImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
         ])
     }
     
@@ -170,6 +183,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             let image = UIImage(named: "AddButton")
             button.setImage(image, for: .normal)
             checkBoxImageView.removeFromSuperview()
+        }
+        
+        if tracker.isPinned {
+            pinImageView.isHidden = false
+        } else {
+            pinImageView.isHidden = true
         }
     }
     

@@ -78,7 +78,7 @@ final class StatisticsViewController: UIViewController {
         view.backgroundColor = .systemBackground
         addNCViews()
         setupViews()
-        updateStat()
+//        updateStat()
     }
 
     // MARK: -  Private Methods
@@ -215,7 +215,12 @@ extension StatisticsViewController: UICollectionViewDataSource {
     }
     private func statInfo3() -> Int {
         let uniqueDaysWithTrackers = Set(completedTrackers.map { $0.date }).count
-        let averageTrackersPerDay = completedTrackers.count / uniqueDaysWithTrackers
+        var averageTrackersPerDay = 0
+        if uniqueDaysWithTrackers == 0 {
+            averageTrackersPerDay = 0
+        } else {
+            averageTrackersPerDay = completedTrackers.count / uniqueDaysWithTrackers
+        }
         return averageTrackersPerDay
     }
 }

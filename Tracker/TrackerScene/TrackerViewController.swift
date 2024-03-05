@@ -375,9 +375,10 @@ extension TrackerViewController: UICollectionViewDelegate {
         }
         
         let indexPath = indexPaths[0]
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
         
         return UIContextMenuConfiguration(actionProvider: { actions in
-            let pinTitle = NSLocalizedString("pinTracker.title",
+            let pinTitle = NSLocalizedString(tracker.isPinned ? "unpinTracker.title" : "pinTracker.title",
                                             comment: "Text displayed on pinTracker, main scene")
             let editTitle = NSLocalizedString("editTracker.title",
                                             comment: "Text displayed on editTracker, main scene")
@@ -403,6 +404,16 @@ extension TrackerViewController: UICollectionViewDelegate {
     
     // Pin Tracker Logic
     private func pinTracker(indexPath: IndexPath) {
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
+        togglePinStatus(for: tracker)
+    }
+    
+    private func togglePinStatus(for tracker: Tracker) {
+        guard let index = trackers.firstIndex(where: { $0.trackerId == tracker.trackerId }) else {
+            return
+        }
+        trackers[index].isPinned.toggle()
+        didUpdateEditedTracker(trackers[index])
         updateUIAfterActions()
     }
     
@@ -519,8 +530,12 @@ extension TrackerViewController {
         // Извлекаем данные из Core Data
         extractDataFromCD()
         
-        visibleCategories = categories.compactMap { category in
-            let tracker = category.trackers.filter { tracker in
+        // Сохранение категории и их закрепленные трекеры
+        var updatedCategories: [TrackerCategory] = []
+        var pinnedTrackers: [Tracker] = []
+        
+        for category in categories {
+            let filteredTrackers = category.trackers.filter { tracker in
                 guard !tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty else {
                     return true
                 }
@@ -532,15 +547,32 @@ extension TrackerViewController {
                 return textCondition && trackerCondition
             }
             
-            if tracker.isEmpty {
-                return nil
+            // Разделение трекеров на закрепленные и обычные
+            let (pinned, regular) = filteredTrackers.reduce(into: ([Tracker](), [Tracker]())) { result, tracker in
+                if tracker.isPinned {
+                    result.0.append(tracker)
+                } else {
+                    result.1.append(tracker)
+                }
             }
+            pinnedTrackers.append(contentsOf: pinned)
             
-            return TrackerCategory(
-                title: category.title,
-                trackers: tracker
-            )
+            // Создание категории только с обычными трекерами
+            if !regular.isEmpty {
+                updatedCategories.append(TrackerCategory(title: category.title, trackers: regular))
+            }
         }
+        
+        // Добавление категории с закрепленными трекерами
+        if !pinnedTrackers.isEmpty {
+            let pinnedCategory = TrackerCategory(
+                title: NSLocalizedString("pinnedCategory.title",
+                                         comment: "Text displayed on pinnedCategoryTitle, main scene"),
+                trackers: pinnedTrackers)
+            updatedCategories.insert(pinnedCategory, at: 0)
+        }
+        categories = updatedCategories
+        visibleCategories = updatedCategories
         
         let containTrackers = visibleCategories.contains { category in
             return !category.trackers.isEmpty

@@ -16,8 +16,9 @@ struct Tracker {
     let trackerSchedule: TrackerSchedule
     let category: String
     let isDone: Bool
+    var isPinned: Bool
     
-    init(trackerId: UUID, trackerName: String, trackerColor: UIColor, trackerEmoji: String, trackerSchedule: TrackerSchedule, category: String, isDone: Bool) {
+    init(trackerId: UUID, trackerName: String, trackerColor: UIColor, trackerEmoji: String, trackerSchedule: TrackerSchedule, category: String, isDone: Bool, isPinned: Bool) {
         self.trackerId = trackerId
         self.trackerName = trackerName
         self.trackerColor = trackerColor
@@ -25,6 +26,7 @@ struct Tracker {
         self.trackerSchedule = trackerSchedule
         self.category = category
         self.isDone = isDone
+        self.isPinned = isPinned
     }
 }
 

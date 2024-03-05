@@ -284,7 +284,8 @@ final class NewHabitCreationViewController: UIViewController {
                 trackerSchedule: TrackerSchedule(
                     trackerScheduleDaysOfWeek: selectedDays),
                 category: selectedCategoryString,
-                isDone: false
+                isDone: false,
+                isPinned: false
             )
             
             delegate?.didCreateTracker(tracker)

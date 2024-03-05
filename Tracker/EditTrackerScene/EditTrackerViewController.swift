@@ -391,7 +391,8 @@ final class EditTrackerViewController: UIViewController {
                 trackerSchedule: TrackerSchedule(
                     trackerScheduleDaysOfWeek: selectedDays),
                 category: selectedCategoryString,
-                isDone: tracker.isDone
+                isDone: tracker.isDone,
+                isPinned: tracker.isPinned
             )
             
             delegate?.didUpdateEditedTracker(updatedTracker)

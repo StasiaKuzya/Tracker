@@ -70,6 +70,7 @@ final class TrackerStore: NSObject {
         trackerCoreData.category = trackerCoreData.trackerCategoryCoreData?.title
         
         trackerCoreData.isDone = ((trackerCoreData.trackerRecordCoreDate?.contains(tracker.trackerId)) != nil)
+        trackerCoreData.isPinned = tracker.isPinned
         
         // Сохраняем новый трекер или изменения в уже существующем
         do {
@@ -149,6 +150,7 @@ extension TrackerStore {
         
         // Проверка наличия трекера в записях
         let isDone = trackerCorData.trackerRecordCoreDate?.contains(trackerId) == true
+        let isPinned = trackerCorData.isPinned
         
         return Tracker(
             trackerId: trackerId,
@@ -157,7 +159,8 @@ extension TrackerStore {
             trackerEmoji: trackerEmoji,
             trackerSchedule: trackerSchedule,
             category: category,
-            isDone: isDone
+            isDone: isDone,
+            isPinned: isPinned
         )
     }
 }
