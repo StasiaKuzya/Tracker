@@ -22,6 +22,7 @@
 "alertDeleteButton1.title" = "Delete";
 "alertDeleteButton2.title" = "Cancel";
 "pinnedCategory.title" = "Pinned";
+"filterButton.title" = "Filters";
 
 // TypeSelectionScene
 "habitButton.title" = "Habit";

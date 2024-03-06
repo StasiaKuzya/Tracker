@@ -22,6 +22,7 @@
 "alertDeleteButton1.title" = "Удалить";
 "alertDeleteButton2.title" = "Отменить";
 "pinnedCategory.title" = "Закрепленные";
+"filterButton.title" = "Фильтры";
 
 // TypeSelectionScene
 "habitButton.title" = "Привычка";
