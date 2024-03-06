@@ -83,3 +83,9 @@
 "statInfo1.title" = "Perfect days";
 "statInfo2.title" = "Completed trackers";
 "statInfo3.title" = "Average";
+
+// FilterScene
+"All" = "All trackers";
+"Today" = "Trackers for today";
+"Completed" = "Completed trackers";
+"Incompleted" = "Incompleted trackers";

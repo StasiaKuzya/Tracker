@@ -14,6 +14,7 @@ final class TrackerViewController: UIViewController {
     private let trackerStore = TrackerStore()
     private let trackerCategoryStore = TrackerCategoryStore()
     private let trackerRecordStore = TrackerRecordStore()
+    var trackerFilterOption: TrackerFilterOption = .all
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd.MM.yy"
@@ -98,7 +99,24 @@ final class TrackerViewController: UIViewController {
         return label
     }()
     
-    // TODO:
+    private lazy var filterButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle(
+            NSLocalizedString("filterButton.title",
+                              comment: "Text displayed on filterButtonTitle, main scene"),
+            for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        button.backgroundColor = .designBlue
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 16
+        button.addTarget(
+            self,
+            action: #selector(filterButtonTapped),
+            for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
     private var trackers: [Tracker] = []
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
@@ -180,6 +198,7 @@ final class TrackerViewController: UIViewController {
         view.addSubview(emptyTrackerStateStackView)
         view.addSubview(wrongTextSearchStackView)
         view.addSubview(searchTextField)
+        view.addSubview(filterButton)
         
         NSLayoutConstraint.activate([
             searchTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 7),
@@ -197,9 +216,15 @@ final class TrackerViewController: UIViewController {
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            datePicker.widthAnchor.constraint(equalToConstant: 120)
+            datePicker.widthAnchor.constraint(equalToConstant: 120),
+            
+            filterButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -additionalSafeAreaInsets.bottom - 16),
+            filterButton.widthAnchor.constraint(equalToConstant: 114),
+            filterButton.heightAnchor.constraint(equalToConstant: 50),
+            filterButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor)
+            
         ])
-        
+        print("bottom \(additionalSafeAreaInsets.bottom)")
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: "cellTrackerCV")
@@ -211,15 +236,22 @@ final class TrackerViewController: UIViewController {
         showTrackerTypeSelectionScreen()
     }
     
-    @objc private func datePickerValueChanged() {
-        updateTrackersForDate()
-    }
-    
     private func showTrackerTypeSelectionScreen() {
         let trackerTypeSelectionVС = TrackerTypeSelectionViewController()
         trackerTypeSelectionVС.delegate = self
         let navigationController = UINavigationController(rootViewController: trackerTypeSelectionVС)
         present(navigationController, animated: true, completion: nil)
+    }
+    
+    @objc private func datePickerValueChanged() {
+        updateTrackersForDate()
+    }
+    
+    @objc private func filterButtonTapped() {
+        let filtersVC = FiltersViewController()
+        filtersVC.filtersSelectionDelegate = self
+        let filtersNC = UINavigationController(rootViewController: filtersVC)
+        present(filtersNC, animated: true, completion: nil)
     }
 }
 
@@ -534,19 +566,45 @@ extension TrackerViewController {
         var updatedCategories: [TrackerCategory] = []
         var pinnedTrackers: [Tracker] = []
         
+//        for category in categories {
+//            let filteredTrackers = category.trackers.filter { tracker in
+//                guard !tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty else {
+//                    return true
+//                }
+//                
+//                let textCondition = filtredText.isEmpty ||
+//                tracker.trackerName.lowercased().contains(filtredText)
+//                let trackerCondition = tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains { $0.numberDay == selectedDayNumber } || tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty
+//                
+//                return textCondition && trackerCondition
+//            }
         for category in categories {
-            let filteredTrackers = category.trackers.filter { tracker in
-                guard !tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty else {
-                    return true
+        let filteredTrackers = category.trackers.filter { tracker in
+            let trackerCondition: Bool
+            switch trackerFilterOption {
+                //TODO: 
+            case .all, .today:
+                if trackerFilterOption == .today {
+                    datePicker.setDate(Date(), animated: true)
+                    collectionView.reloadData()
                 }
-                
-                let textCondition = filtredText.isEmpty ||
-                tracker.trackerName.lowercased().contains(filtredText)
-                let trackerCondition = tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains { $0.numberDay == selectedDayNumber } || tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty
-                
-                return textCondition && trackerCondition
+                trackerCondition = tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains { $0.numberDay == selectedDayNumber }
+            case .completed:
+                trackerCondition = completedTrackers.contains {
+                    $0.trackerID == tracker.trackerId
+                    && Calendar.current.isDate($0.date, inSameDayAs: datePicker.date)
+                }
+            case .incompleted:
+                trackerCondition = completedTrackers.contains {
+                    $0.trackerID != tracker.trackerId
+                    && Calendar.current.isDate($0.date, inSameDayAs: datePicker.date)
+                }
             }
             
+            let textCondition = filtredText.isEmpty || tracker.trackerName.lowercased().contains(filtredText)
+            
+            return textCondition && trackerCondition
+        }
             // Разделение трекеров на закрепленные и обычные
             let (pinned, regular) = filteredTrackers.reduce(into: ([Tracker](), [Tracker]())) { result, tracker in
                 if tracker.isPinned {
@@ -705,5 +763,29 @@ extension TrackerViewController: TrackerEditDataDelegate {
         } catch {
             print("Ошибка при обновлении данных по трекеру: \(error)")
         }
+    }
+}
+
+// MARK: - Extension FiltersSelectionDelegate
+
+extension TrackerViewController: FiltersSelectionDelegate {
+    func didSelectFilter(_ filter: TrackerFilterOption) {
+        print("filter \(filter)")
+        trackerFilterOption = filter
+        updateTrackersForDate()
+    }
+    
+    func filtersVCDismissed(_ vc: FiltersViewController) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func switchToCompletedTrackers() {
+        trackerFilterOption = .completed
+        updateTrackersForDate()
+    }
+
+    func switchToIncompleteTrackers() {
+        trackerFilterOption = .incompleted
+        updateTrackersForDate()
     }
 }

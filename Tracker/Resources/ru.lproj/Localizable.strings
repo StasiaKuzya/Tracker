@@ -67,3 +67,9 @@
 "statInfo1.title" = "Идеальные дни";
 "statInfo2.title" = "Трекеров завершено";
 "statInfo3.title" = "Среднее значение";
+
+// FilterScene
+"All" = "Все трекеры";
+"Today" = "Трекеры на сегодня";
+"Completed" = "Завершенные";
+"Incompleted" = "Незавершенные";
