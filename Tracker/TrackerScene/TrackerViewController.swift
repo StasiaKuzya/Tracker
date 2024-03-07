@@ -248,8 +248,9 @@ final class TrackerViewController: UIViewController {
     }
     
     @objc private func filterButtonTapped() {
-        let filtersVC = FiltersViewController()
+        let filtersVC = FiltersViewController(trackerVC: self)
         filtersVC.filtersSelectionDelegate = self
+        filtersVC.currentFilter = trackerFilterOption
         let filtersNC = UINavigationController(rootViewController: filtersVC)
         present(filtersNC, animated: true, completion: nil)
     }
@@ -566,28 +567,11 @@ extension TrackerViewController {
         var updatedCategories: [TrackerCategory] = []
         var pinnedTrackers: [Tracker] = []
         
-//        for category in categories {
-//            let filteredTrackers = category.trackers.filter { tracker in
-//                guard !tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty else {
-//                    return true
-//                }
-//                
-//                let textCondition = filtredText.isEmpty ||
-//                tracker.trackerName.lowercased().contains(filtredText)
-//                let trackerCondition = tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains { $0.numberDay == selectedDayNumber } || tracker.trackerSchedule.trackerScheduleDaysOfWeek.isEmpty
-//                
-//                return textCondition && trackerCondition
-//            }
         for category in categories {
         let filteredTrackers = category.trackers.filter { tracker in
             let trackerCondition: Bool
             switch trackerFilterOption {
-                //TODO: 
             case .all, .today:
-                if trackerFilterOption == .today {
-                    datePicker.setDate(Date(), animated: true)
-                    collectionView.reloadData()
-                }
                 trackerCondition = tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains { $0.numberDay == selectedDayNumber }
             case .completed:
                 trackerCondition = completedTrackers.contains {
@@ -595,10 +579,11 @@ extension TrackerViewController {
                     && Calendar.current.isDate($0.date, inSameDayAs: datePicker.date)
                 }
             case .incompleted:
-                trackerCondition = completedTrackers.contains {
-                    $0.trackerID != tracker.trackerId
+                let trackerIsCompletedForDate = completedTrackers.contains {
+                    $0.trackerID == tracker.trackerId
                     && Calendar.current.isDate($0.date, inSameDayAs: datePicker.date)
                 }
+                trackerCondition = !trackerIsCompletedForDate && tracker.trackerSchedule.trackerScheduleDaysOfWeek.contains { $0.numberDay == selectedDayNumber }
             }
             
             let textCondition = filtredText.isEmpty || tracker.trackerName.lowercased().contains(filtredText)
@@ -694,6 +679,29 @@ extension TrackerViewController {
             emptyTrackerStateStackView.isHidden = true
             wrongTextSearchStackView.isHidden = false
         }
+        updateUIForTrackersAfterFilters(containTrackers)
+    }
+    
+    private func updateUIForTrackersAfterFilters(_ containTrackers: Bool) {
+        if trackerFilterOption == .all || trackerFilterOption == .today {
+            if !containTrackers {
+                filterButton.isHidden = true
+                wrongTextSearchStackView.isHidden = true
+            } else {
+                filterButton.isHidden = false
+                wrongTextSearchStackView.isHidden = true
+            }
+        } else {
+            if !containTrackers {
+                filterButton.isHidden = false
+                wrongTextSearchStackView.isHidden = false
+                emptyTrackerStateStackView.isHidden = true
+            } else {
+                filterButton.isHidden = true
+                wrongTextSearchStackView.isHidden = true
+                emptyTrackerStateStackView.isHidden = false
+            }
+        }
     }
 }
 
@@ -770,22 +778,16 @@ extension TrackerViewController: TrackerEditDataDelegate {
 
 extension TrackerViewController: FiltersSelectionDelegate {
     func didSelectFilter(_ filter: TrackerFilterOption) {
-        print("filter \(filter)")
         trackerFilterOption = filter
-        updateTrackersForDate()
+        if filter == .today {
+            datePicker.setDate(Date(), animated: true)
+            updateTrackersForDate()
+        } else {
+            updateTrackersForDate()
+        }
     }
     
     func filtersVCDismissed(_ vc: FiltersViewController) {
         dismiss(animated: true, completion: nil)
-    }
-    
-    func switchToCompletedTrackers() {
-        trackerFilterOption = .completed
-        updateTrackersForDate()
-    }
-
-    func switchToIncompleteTrackers() {
-        trackerFilterOption = .incompleted
-        updateTrackersForDate()
     }
 }

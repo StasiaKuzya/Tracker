@@ -18,6 +18,8 @@ final class FiltersViewController: UIViewController {
     // MARK: -  Properties & Constants
     
     weak var filtersSelectionDelegate: FiltersSelectionDelegate?
+    private let trackerVC: TrackerViewController
+    var currentFilter: TrackerFilterOption?
     private var filterCategories: [TrackerFilterOption] = [
         .all,
         .today,
@@ -37,7 +39,8 @@ final class FiltersViewController: UIViewController {
 
     var tableCount: CGFloat?
     
-    init() {
+    init(trackerVC: TrackerViewController) {
+        self.trackerVC = trackerVC
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -109,9 +112,16 @@ extension FiltersViewController: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)  as? CategoryTableViewCell else {
             fatalError("Unable to dequeue CategoryTableViewCell")
         }
+        let filterOption = filterCategories[indexPath.row]
+        cell.textLabel?.text = filterOption.name
         
-        cell.textLabel?.text = filterCategories[indexPath.row].name
-        cell.accessoryType = .none
+        // Установливаем галочку, если текущий фильтр совпадает с этим вариантом фильтра
+        if filterOption ==  trackerVC.trackerFilterOption {
+            cell.accessoryType = .checkmark
+        } else {
+            cell.accessoryType = .none
+        }
+        
         return cell
     }
 }
