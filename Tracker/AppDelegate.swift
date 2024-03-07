@@ -11,7 +11,6 @@ import CoreData
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    var window: UIWindow?
     lazy var persistentContainer: NSPersistentContainer = {
             let container = NSPersistentContainer(name: "TrackerCoreData")
             container.loadPersistentStores(completionHandler: { (storeDescription, error) in
@@ -23,12 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-        let viewController = SplashViewController()
-        window = UIWindow()
-        window?.rootViewController = viewController
-        window?.makeKeyAndVisible()
-        
         return true
     }
 

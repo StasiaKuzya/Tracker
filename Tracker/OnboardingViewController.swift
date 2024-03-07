@@ -86,6 +86,7 @@ class OnboardingViewController: UIPageViewController {
         
         let greatingLabel = UILabel()
         greatingLabel.text = text
+        greatingLabel.textColor = .black
         greatingLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
         greatingLabel.numberOfLines = 2
         greatingLabel.textAlignment = .center
@@ -103,7 +104,7 @@ class OnboardingViewController: UIPageViewController {
         let startButton = UIButton(type: .system)
         startButton.setTitle(onboardingStartButton, for: .normal)
         startButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        startButton.backgroundColor = .designBlack
+        startButton.backgroundColor = .black
         startButton.setTitleColor(.white, for: .normal)
         startButton.layer.cornerRadius = 16
         startButton.addTarget(self, action: #selector(startButtonTapped), for: .touchUpInside)

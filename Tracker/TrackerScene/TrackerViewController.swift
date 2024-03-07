@@ -697,9 +697,9 @@ extension TrackerViewController {
                 wrongTextSearchStackView.isHidden = false
                 emptyTrackerStateStackView.isHidden = true
             } else {
-                filterButton.isHidden = true
+                filterButton.isHidden = false
                 wrongTextSearchStackView.isHidden = true
-                emptyTrackerStateStackView.isHidden = false
+                emptyTrackerStateStackView.isHidden = true
             }
         }
     }
