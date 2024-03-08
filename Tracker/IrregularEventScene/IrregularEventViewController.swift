@@ -15,6 +15,7 @@ final class IrreguralEventViewController: UIViewController {
     weak var delegate: TrackerDataDelegate?
     private let categoryStore = TrackerCategoryStore()
     private var selectedIndexes: [Int: Int] = [:]
+    private var lastSelectedIndexPaths: [Int: IndexPath] = [:]
     private var selectedEmoji: String?
     private var selectedColor: UIColor?
     
@@ -425,6 +426,24 @@ extension IrreguralEventViewController: UICollectionViewDataSource {
             }
         }
         
+        // Восстановление состояния выделения
+        if let selectedRow = selectedIndexes[indexPath.section], selectedRow == indexPath.row {
+            collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+        }
+        
+        // Пометка последней выбранной ячейки в секции
+        if let lastSelectedIndexPath = lastSelectedIndexPaths[indexPath.section], lastSelectedIndexPath == indexPath {
+            if indexPath.section == 0 {
+                selectedEmoji = emojies[indexPath.row]
+                cell.configureColor(.designLightGray)
+            } else {
+                selectedColor = colors[indexPath.row]
+                cell.pickConfiguredColor(selectedColor ?? .designBackground)
+            }
+        } else {
+            cell.backgroundColor = .clear
+        }
+        
         // Возвратить ячейку
         return cell
     }
@@ -518,6 +537,7 @@ extension IrreguralEventViewController: UICollectionViewDelegate {
         
         // Обновление словаря с выбранным индексом в данной секции
         selectedIndexes[indexPath.section] = indexPath.row
+        lastSelectedIndexPaths[indexPath.section] = indexPath
         
         if indexPath.section == 0 {
             selectedEmoji = emojies[indexPath.row]

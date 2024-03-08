@@ -23,6 +23,7 @@ final class EditTrackerViewController: UIViewController {
     private var selectedEmoji: String?
     private var selectedColor: UIColor?
     private var tracker: Tracker
+    private var lastSelectedIndexPaths: [Int: IndexPath] = [:]
     
     private var words: [(title: String, subtitle: String?)] = [
         (NSLocalizedString("categoryTable.title",
@@ -283,7 +284,6 @@ final class EditTrackerViewController: UIViewController {
         do {
             let count = try trackerRecordStore.countTrackerRecords(forTrackerId: id)
             trackerID = count
-            print("Количество записей для трекера с ID: \(count)")
         } catch {
             print("Ошибка при получении количества записей для трекера: \(error)")
         }
@@ -333,35 +333,20 @@ final class EditTrackerViewController: UIViewController {
             }
             
             if let indexColors = indexColors {
-                selectedIndexes = [indexEmoji : indexColors]
+                selectedIndexes[0] = indexEmoji
+                selectedIndexes[1] = indexColors
+                
+                collectionView.selectItem(at: IndexPath(item: indexEmoji, section: 0), animated: false, scrollPosition: [])
+                collectionView.selectItem(at: IndexPath(item: indexColors, section: 1), animated: false, scrollPosition: [])
                 selectedEmoji = emojies[indexEmoji]
                 selectedColor = colors[indexColors]
-                print("\(indexEmoji) & \(indexColors) & \(selectedIndexes)")
+                print("print index \(indexEmoji) & \(indexColors) & \(selectedIndexes)")
+                
+                lastSelectedIndexPaths[0] = IndexPath(item: indexEmoji, section: 0)
+                lastSelectedIndexPaths[1] = IndexPath(item: indexColors, section: 1)
             }
         }
-//        updateSelectedCellsInCollectionView()
         updateCreationButtonColor()
-    }
-    
-    func updateSelectedCellsInCollectionView() {
-        collectionView.reloadData()
-//         Обновляем выбранные ячейки в соответствии с selectedIndexes
-        for (section, row) in selectedIndexes {
-            let indexPath = IndexPath(row: row, section: section)
-            print("&Updated indexPath: \(collectionView(collectionView, cellForItemAt: indexPath)) \(indexPath) \(indexPath.section)")
-            if let cell = collectionView(collectionView, cellForItemAt: indexPath) as? ColorEmojiCollectionViewCell {
-                if section == 0 {
-                    selectedEmoji = emojies[indexPath.row]
-                    cell.configureColor(.designLightGray)
-                    print("&Updated emoji cell at indexPath: \(indexPath)")
-                } else {
-                    selectedColor = colors[indexPath.row]
-                    cell.pickConfiguredColor(selectedColor ?? .colorSection1)
-                    print("&Updated color cell at indexPath: \(indexPath)")
-                }
-            }
-        }
-//        updateCreationButtonColor()
     }
     
     @objc private func cancelButtonTapped() {
@@ -528,17 +513,23 @@ extension EditTrackerViewController: ScheduleSelectionDelegate {
 
 extension EditTrackerViewController: UICollectionViewDataSource {
     
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
+    func numberOfSections(
+        in collectionView: UICollectionView
+    ) -> Int {
         return collectionView == self.collectionView ? 2 : 1
     }
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        numberOfItemsInSection section: Int
+    ) -> Int {
         if collectionView == self.collectionView {
             return section == 0 ? emojies.count : colors.count
         }
         return section
     }
     
+    // В методе cellForItemAt
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         // Создать ячейку
         guard let cell = collectionView.dequeueReusableCell(
@@ -548,8 +539,7 @@ extension EditTrackerViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
-        // Настроить ячейку
-        cell.prepareForReuse()
+        // Настройка внешнего вида ячейки
         if collectionView == self.collectionView {
             if indexPath.section == 0 {
                 cell.configureColor(.clear)
@@ -560,12 +550,36 @@ extension EditTrackerViewController: UICollectionViewDataSource {
                 cell.configure(title: "")
             }
         }
+
+        // Восстановление состояния выделения
+        if let selectedRow = selectedIndexes[indexPath.section], selectedRow == indexPath.row {
+            collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+        }
+        
+        // Пометка последней выбранной ячейки в секции
+        if let lastSelectedIndexPath = lastSelectedIndexPaths[indexPath.section], lastSelectedIndexPath == indexPath {
+            if indexPath.section == 0 {
+                selectedEmoji = emojies[indexPath.row]
+                cell.configureColor(.designLightGray)
+            } else {
+                selectedColor = colors[indexPath.row]
+                cell.pickConfiguredColor(selectedColor ?? .designBackground)
+            }
+        } else {
+            cell.backgroundColor = .clear
+        }
         
         // Возвратить ячейку
         return cell
     }
+
+
     
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
         var id: String
         switch kind {
         case UICollectionView.elementKindSectionHeader:
@@ -614,30 +628,50 @@ extension EditTrackerViewController: UICollectionViewDelegateFlowLayout {
         )
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
         let availableWidth = collectionView.frame.width - params.paddingWidth
         let cellWidth =  availableWidth / CGFloat(params.cellCount)
         return CGSize(width: cellWidth, height: cellWidth)
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        insetForSectionAt section: Int
+    ) -> UIEdgeInsets {
         return UIEdgeInsets(top: 24, left: params.leftInset, bottom: 24, right: params.rightInset)
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumLineSpacingForSectionAt section: Int
+    ) -> CGFloat {
         return 0
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        params.cellSpacing
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumInteritemSpacingForSectionAt section: Int
+    ) -> CGFloat {
+        return params.cellSpacing
     }
 }
 
-// MARK: - NewHabitCreationViewController
+// MARK: - UICollectionViewDelegate
 
 extension EditTrackerViewController: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        didSelectItemAt indexPath: IndexPath
+    ) {
         guard let cell = collectionView.cellForItem(at: indexPath) as? ColorEmojiCollectionViewCell else {
+            print("Failed to get cell at \(indexPath)")
             return
         }
         
@@ -657,6 +691,7 @@ extension EditTrackerViewController: UICollectionViewDelegate {
         
         // Обновление словаря с выбранным индексом в данной секции
         selectedIndexes[indexPath.section] = indexPath.row
+        lastSelectedIndexPaths[indexPath.section] = indexPath
         
         if indexPath.section == 0 {
             selectedEmoji = emojies[indexPath.row]
