@@ -16,6 +16,7 @@ protocol TrackerCellDelegate: AnyObject{
 final class TrackerCollectionViewCell: UICollectionViewCell {
     
     weak var delegate: TrackerCellDelegate?
+    private let analyticsService = AnalyticsService()
     private var completedForDate: Bool = false
     private var trackerId: UUID?
     private var indexPath: IndexPath?
@@ -208,6 +209,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         if completedForDate {
             delegate?.uncompleteTracker(id: trackerId, at: indexPath)
         } else {
+            analyticsService.report(event: "click", params: ["screen": "Main", "item": "track"])
             delegate?.completeTracker(id: trackerId, at: indexPath)
         }
     }

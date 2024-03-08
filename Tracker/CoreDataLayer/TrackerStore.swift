@@ -101,6 +101,9 @@ final class TrackerStore: NSObject {
     }
 
     func deleteTracker(_ tracker: Tracker) throws {
+        let trackerRecordStore = TrackerRecordStore()
+        trackerRecordStore.deleteTrackerRecordsForOne(by: tracker.trackerId)
+        
         let request = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         request.predicate = NSPredicate(
             format: "trackerId == %@",

@@ -80,6 +80,21 @@ extension TrackerRecordStore {
         }
     }
     
+    func deleteTrackerRecordsForOne(by trackerId: UUID) {
+        let request = NSFetchRequest<TrackerRecordCoreData>(entityName: "TrackerRecordCoreData")
+        request.predicate = NSPredicate(format: "trackerID == %@", trackerId as CVarArg)
+        
+        do {
+            let trackerRecordsCoreData = try context.fetch(request)
+            for trackerRecord in trackerRecordsCoreData {
+                context.delete(trackerRecord)
+            }
+            try context.save()
+        } catch {
+            print("Failed to delete tracker records: \(error)")
+        }
+    }
+    
     func countTrackerRecords(forTrackerId trackerId: UUID) throws -> Int {
         let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "trackerID == %@", trackerId as CVarArg)

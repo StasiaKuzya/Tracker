@@ -14,6 +14,7 @@ final class TrackerViewController: UIViewController {
     private let trackerStore = TrackerStore()
     private let trackerCategoryStore = TrackerCategoryStore()
     private let trackerRecordStore = TrackerRecordStore()
+    private let analyticsService = AnalyticsService()
     var trackerFilterOption: TrackerFilterOption = .all
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -156,6 +157,13 @@ final class TrackerViewController: UIViewController {
         categories = trackerCategoryStore.fetchAllCategories()
         completedTrackers = trackerRecordStore.fetchAllTrackerRecords()
         updateTrackersForDate()
+        
+        analyticsService.report(event: "open", params: ["screen": "Main"])
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(true)
+        analyticsService.report(event: "close", params: ["screen": "Main"])
     }
     
     // MARK: -  Private Methods
@@ -233,6 +241,7 @@ final class TrackerViewController: UIViewController {
     }
     
     @objc private func addTrackerButtonTapped() {
+        analyticsService.report(event: "click", params: ["screen": "Main", "item": "add_track"])
         showTrackerTypeSelectionScreen()
     }
     
@@ -248,6 +257,7 @@ final class TrackerViewController: UIViewController {
     }
     
     @objc private func filterButtonTapped() {
+        analyticsService.report(event: "click", params: ["screen": "Main", "item": "filter"])
         let filtersVC = FiltersViewController(trackerVC: self)
         filtersVC.filtersSelectionDelegate = self
         filtersVC.currentFilter = trackerFilterOption
@@ -452,6 +462,7 @@ extension TrackerViewController: UICollectionViewDelegate {
     
     // Edit Tracker Logic
     private func editTracker(indexPath: IndexPath) {
+        analyticsService.report(event: "click", params: ["screen": "Main", "item": "edit"])
         let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
         showEditTrackerScreen(for: tracker)
         updateUIAfterActions()
@@ -466,6 +477,7 @@ extension TrackerViewController: UICollectionViewDelegate {
     
     // Delete Tracker Logic
     private func deleteTracker(indexPath: IndexPath) {
+        analyticsService.report(event: "click", params: ["screen": "Main", "item": "delete"])
         let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
         showDeleteAlert(tracker: tracker)
     }
