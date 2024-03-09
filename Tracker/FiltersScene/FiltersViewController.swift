@@ -116,11 +116,7 @@ extension FiltersViewController: UITableViewDataSource {
         cell.textLabel?.text = filterOption.name
         
         // Установливаем галочку, если текущий фильтр совпадает с этим вариантом фильтра
-        if filterOption ==  trackerVC.trackerFilterOption {
-            cell.accessoryType = .checkmark
-        } else {
-            cell.accessoryType = .none
-        }
+        cell.accessoryType = filterOption == trackerVC.trackerFilterOption ? .checkmark : .none
         
         return cell
     }

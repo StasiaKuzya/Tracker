@@ -10,11 +10,15 @@ import XCTest
 import SnapshotTesting
 
 final class TrackerTests: XCTestCase {
-
-     func testViewController() {
-//         isRecording = true
-         let vc = TrackerViewController()
-         assertSnapshot(matching: vc, as: .image)
-     }
     
+    func testViewController() {
+        //isRecording = true
+        let vc = TrackerViewController()
+        assertSnapshot(matching: vc, as: .image(traits: .init(userInterfaceStyle: .light)))
+    }
+    
+    func testViewControllerDarkTheme() {
+        let vc = TrackerViewController()
+        assertSnapshot(matching: vc, as: .image(traits: .init(userInterfaceStyle: .dark)))
+    }
 }
