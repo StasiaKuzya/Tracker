@@ -50,7 +50,8 @@ final class CategoryManagementViewController: UIViewController {
     
     private let emptyTrackerStateLabel: UILabel = {
         let label = UILabel()
-        label.text = "Привычки и события можно\nобъединить по смыслу"
+        label.text = NSLocalizedString("emptyTrackerStateLabel.title",
+                                       comment: "Text displayed on emptyTrackerStateLabel, categoryScene")
         label.textAlignment = .center
         label.numberOfLines = 2
         label.textColor = .designBlack
@@ -58,13 +59,15 @@ final class CategoryManagementViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+   private let addCategoryButtonTitle = NSLocalizedString("addCategoryButton.title",
+                        comment: "Text displayed on addCategoryButtonTitle")
     
     private lazy var addButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(addCategoryButtonTitle, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         button.backgroundColor = .designBlack
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(.designWhite, for: .normal)
         button.layer.cornerRadius = 16
         button.addTarget(
             self,
@@ -88,28 +91,39 @@ final class CategoryManagementViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Категории"
-        view.backgroundColor = .white
+        title = NSLocalizedString("categoryLabelTitle.title",
+                                  comment: "Text displayed on categoryLabelTitle")
+        view.backgroundColor = .designWhite
         
         setupViewModel()
         setupViews()
         loadCategories()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        addUpperAndLowerBorders(to: tableView)
+    }
+    
     // MARK: - Private Methods
+    
+    private func addUpperAndLowerBorders(to view: UIView) {
+        let upperBorderView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 1.0))
+        upperBorderView.backgroundColor = .designWhite
+        view.addSubview(upperBorderView)
+        
+        let lowerBorderView = UIView(frame: CGRect(x: 0, y: view.frame.height - 1, width: view.frame.size.width, height: 1.0))
+        lowerBorderView.backgroundColor = .designWhite
+        view.addSubview(lowerBorderView)
+    }
     
     private func setupViews() {
         view.addSubview(tableView)
         view.addSubview(emptyTrackerStateStackView)
         view.addSubview(addButton)
         
-        tableView.layer.borderWidth = 1
-        tableView.layer.borderColor = view.backgroundColor?.cgColor
-        
         tableView.layer.masksToBounds = true
         tableView.layer.cornerRadius = 16
-        tableView.layer.borderWidth = 1
-        tableView.layer.borderColor = UIColor.designWhite.cgColor
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),

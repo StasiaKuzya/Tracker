@@ -1,0 +1,75 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Анастасия on 25.02.2024.
+  
+*/
+// TabBar
+"tabBarItem1.title" = "Трекеры";
+"tabBarItem2.title" = "Статистика";
+
+// TrackerMainScene
+"searchTextField.title" = "Поиск";
+"emptyState.title" = "Что будем отслеживать?";
+"wrongSearchState.title" = "Ничего не найдено?";
+"mainLargeTitle.title" = "Трекеры";
+"pinTracker.title" = "Закрепить";
+"unpinTracker.title" = "Открепить";
+"editTracker.title" = "Редактировать";
+"deleteTracker.title" = "Удалить";
+"alertDeleteTracker.title" = "Уверены что хотите удалить трекер?";
+"alertDeleteButton1.title" = "Удалить";
+"alertDeleteButton2.title" = "Отменить";
+"pinnedCategory.title" = "Закрепленные";
+"filterButton.title" = "Фильтры";
+
+// TypeSelectionScene
+"habitButton.title" = "Привычка";
+"irregularEventButton.title" = "Нерегулярное событие";
+"trackerTypeSelection.title" = "Создание трекера";
+"newHabitCreationScene.title" = "Новая привычка";
+"irreguralEventVCScene.title" = "Новое нерегулярное событие";
+
+// Habit & IrreguralEvent Scene
+"categoryTable.title" = "Категория";
+"scheduleTable.title" = "Расписание";
+"nameTrackerTextField.title" = "Введите название трекера";
+"cancelButton.title" = "Отменить";
+"creationButton.title" = "Создать";
+"colorsHeaderCV.title" = "Цвета";
+"editTrackerVC.title" = "Редактирование привычки";
+
+// CategoryManagementScene
+"emptyTrackerStateLabel.title" = "Привычки и события можно\nобъединить по смыслу";
+"addCategoryButton.title" = "Добавить категорию";
+"categoryLabelTitle.title" = "Категории";
+
+// NewCategoryScene
+"newCategoryTextField.title" = "Введите название категории";
+"newCategoryLabelTitle.title" = "Новая категория";
+
+// ScheduleScene
+"scheduleLabelTitle.title" = "Расписание";
+"scheduleEveryDay.title" = "Каждый день";
+
+"saveButton.title" = "Готово";
+
+// OnboardingScene
+"OnboardingLabel1.title" = "Отслеживайте только то, что хотите";
+"OnboardingLabel2.title" = "Даже если это не литры воды и йога";
+"onboardingStartButton.title" = "Вот это технологии";
+
+// StatisticsScene
+"statLargeTitle.title" = "Статистика";
+"statEmptyState.title" = "Анализировать пока нечего";
+"statInfo0.title" = "Лучший период";
+"statInfo1.title" = "Идеальные дни";
+"statInfo2.title" = "Трекеров завершено";
+"statInfo3.title" = "Среднее значение";
+
+// FilterScene
+"All" = "Все трекеры";
+"Today" = "Трекеры на сегодня";
+"Completed" = "Завершенные";
+"Incompleted" = "Не завершенные";

@@ -16,11 +16,12 @@ protocol TrackerCellDelegate: AnyObject{
 final class TrackerCollectionViewCell: UICollectionViewCell {
     
     weak var delegate: TrackerCellDelegate?
+    private let analyticsService = AnalyticsService()
     private var completedForDate: Bool = false
     private var trackerId: UUID?
     private var indexPath: IndexPath?
     
-    private let colorView: UIView = {
+    let colorView: UIView = {
         var colorView = UIView()
         colorView.layer.cornerRadius = 16
         colorView.translatesAutoresizingMaskIntoConstraints = false
@@ -54,10 +55,19 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return emojiLabel
     }()
     
+    private let pinImageView: UIImageView = {
+        let pinImageView = UIImageView()
+        pinImageView.contentMode = .scaleAspectFit
+        pinImageView.image = UIImage(named: "PinImage")?.withRenderingMode(.alwaysTemplate)
+        pinImageView.tintColor = .white
+        pinImageView.translatesAutoresizingMaskIntoConstraints = false
+        return pinImageView
+    }()
+    
     private let nameLabel: UILabel = {
         let nameLabel = UILabel()
         nameLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        nameLabel.textColor = .designWhite
+        nameLabel.textColor = .white
         nameLabel.numberOfLines = 2
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         return nameLabel
@@ -85,8 +95,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let button = UIButton(type: .system)
         let addButtonImage = UIImage(named: "AddButton")
         button.setImage(addButtonImage, for: .normal)
-        //        button.sizeToFit()
-        //        button.tintColor = .designBlue
         button.addTarget(
             self,
             action: #selector(buttonTapped),
@@ -99,7 +107,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let checkBoxImageView = UIImageView()
         checkBoxImageView.contentMode = .scaleAspectFit
         checkBoxImageView.image = UIImage(named: "CheckBox")?.withRenderingMode(.alwaysTemplate)
-        checkBoxImageView.tintColor = .designWhite
+        checkBoxImageView.tintColor = .white
         checkBoxImageView.translatesAutoresizingMaskIntoConstraints = false
         return checkBoxImageView
     }()
@@ -118,6 +126,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(colorView)
         contentView.addSubview(stackViewH)
         emojiView.addSubview(emojiLabel)
+        colorView.addSubview(pinImageView)
         // Настройка констрейнтов
         NSLayoutConstraint.activate([
             colorView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -140,6 +149,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             stackViewH.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
             stackViewH.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
             stackViewH.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            
+            pinImageView.centerYAnchor.constraint(equalTo: emojiView.centerYAnchor),
+            pinImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
         ])
     }
     
@@ -157,7 +169,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         nameLabel.text = tracker.trackerName
         colorView.backgroundColor = tracker.trackerColor
         button.tintColor = tracker.trackerColor
-        daysCountLabel.text = "\(completedDays) дней"
+        daysCountLabel.text = String.localizedStringWithFormat(
+            NSLocalizedString(
+                "numberOfTasks",
+                comment: "Number of daone trackers"),
+            completedDays
+        )
         
         if completedForDate {
             let image = UIImage(named: "DoneButton")
@@ -167,6 +184,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             let image = UIImage(named: "AddButton")
             button.setImage(image, for: .normal)
             checkBoxImageView.removeFromSuperview()
+        }
+        
+        if tracker.isPinned {
+            pinImageView.isHidden = false
+        } else {
+            pinImageView.isHidden = true
         }
     }
     
@@ -186,6 +209,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         if completedForDate {
             delegate?.uncompleteTracker(id: trackerId, at: indexPath)
         } else {
+            analyticsService.report(event: "click", params: ["screen": "Main", "item": "track"])
             delegate?.completeTracker(id: trackerId, at: indexPath)
         }
     }

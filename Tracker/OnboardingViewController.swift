@@ -17,12 +17,17 @@ class OnboardingViewController: UIPageViewController {
         let blue = UIViewController()
         let red = UIViewController()
 
+        let onboardingLabel1 = NSLocalizedString("OnboardingLabel1.title",
+                                          comment: "Text displayed on OnboardingLabel1")
+        let onboardingLabel2 = NSLocalizedString("OnboardingLabel2.title",
+                                          comment: "Text displayed on OnboardingLabel2")
+        
         setUpViews(for: blue,
                    image: "BlueOnboarding",
-                   text: "Отслеживайте только то, что хотите")
+                   text: onboardingLabel1)
         setUpViews(for: red,
                    image: "RedOnboarding",
-                   text: "Даже если это не литры воды и йога")
+                   text: onboardingLabel2)
         
         return [blue, red]
     }()
@@ -81,6 +86,7 @@ class OnboardingViewController: UIPageViewController {
         
         let greatingLabel = UILabel()
         greatingLabel.text = text
+        greatingLabel.textColor = .black
         greatingLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
         greatingLabel.numberOfLines = 2
         greatingLabel.textAlignment = .center
@@ -92,10 +98,13 @@ class OnboardingViewController: UIPageViewController {
             greatingLabel.leadingAnchor.constraint(equalTo: viewController.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
         ])
         
+        let onboardingStartButton = NSLocalizedString("onboardingStartButton.title",
+                                          comment: "Text displayed on onboardingStartButton")
+        
         let startButton = UIButton(type: .system)
-        startButton.setTitle("Вот это технологии", for: .normal)
+        startButton.setTitle(onboardingStartButton, for: .normal)
         startButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        startButton.backgroundColor = .designBlack
+        startButton.backgroundColor = .black
         startButton.setTitleColor(.white, for: .normal)
         startButton.layer.cornerRadius = 16
         startButton.addTarget(self, action: #selector(startButtonTapped), for: .touchUpInside)

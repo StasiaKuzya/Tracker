@@ -21,7 +21,8 @@ final class NewCategoryViewController: UIViewController {
     
     private lazy var textField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = NSLocalizedString("newCategoryTextField.title",
+                                                  comment: "Text displayed on newCategoryTextField")
         textField.textColor = .designGray
         textField.backgroundColor = .designBackground
         textField.font = UIFont.systemFont(ofSize: 17)
@@ -39,9 +40,12 @@ final class NewCategoryViewController: UIViewController {
         return textField
     }()
     
+    private let saveCategoryButtonTitle = NSLocalizedString("saveButton.title",
+                                      comment: "Text displayed on saveCategoryButtonTitle")
+    
     private lazy var saveButton: UIButton = {
         let saveButton = UIButton(type: .system)
-        saveButton.setTitle("Готово", for: .normal)
+        saveButton.setTitle(saveCategoryButtonTitle, for: .normal)
         
         saveButton.titleLabel?.tintColor = .designWhite
         saveButton.setTitleColor(.designWhite, for: .normal)
@@ -61,8 +65,9 @@ final class NewCategoryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Новая категория"
-        view.backgroundColor = .white
+        title = NSLocalizedString("newCategoryLabelTitle.title",
+                                  comment: "Text displayed on newCategoryLabelTitle")
+        view.backgroundColor = .designWhite
         
         textField.delegate = self
         setupViews()

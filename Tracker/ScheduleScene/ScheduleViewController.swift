@@ -35,9 +35,12 @@ final class ScheduleViewController: UIViewController {
         return tableView
     }()
     
+    private let saveScheduleButtonTitle = NSLocalizedString("saveButton.title",
+                                      comment: "Text displayed on saveScheduleButtonTitle")
+    
     private lazy var saveButton: UIButton = {
         let saveButton = UIButton(type: .system)
-        saveButton.setTitle("Готово", for: .normal)
+        saveButton.setTitle(saveScheduleButtonTitle, for: .normal)
         saveButton.isEnabled = false
         saveButton.titleLabel?.tintColor = .designWhite
         saveButton.setTitleColor(.designWhite, for: .normal)
@@ -57,15 +60,30 @@ final class ScheduleViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Расписание"
-        view.backgroundColor = .white
+        title = NSLocalizedString("scheduleLabelTitle.title",
+                                  comment: "Text displayed on scheduleLabelTitle")
+        view.backgroundColor = .designWhite
         
         setDaysOfWeek()
         
         setupViews()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        addUpperAndLowerBorders(to: tableView)
+    }
+    
     // MARK: - Private Methods
+    private func addUpperAndLowerBorders(to view: UIView) {
+        let upperBorderView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 1.0))
+        upperBorderView.backgroundColor = .designWhite
+        view.addSubview(upperBorderView)
+        
+        let lowerBorderView = UIView(frame: CGRect(x: 0, y: view.frame.height - 1, width: view.frame.size.width, height: 1.0))
+        lowerBorderView.backgroundColor = .designWhite
+        view.addSubview(lowerBorderView)
+    }
     
     private func setDaysOfWeek() {
         daysOfWeek = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
@@ -75,9 +93,6 @@ final class ScheduleViewController: UIViewController {
     private func setupViews() {
         view.addSubview(tableView)
         view.addSubview(saveButton)
-        
-        tableView.layer.borderWidth = 1
-        tableView.layer.borderColor = view.backgroundColor?.cgColor
         
         tableView.layer.masksToBounds = true
         tableView.layer.cornerRadius = 16
@@ -124,7 +139,7 @@ extension ScheduleViewController: UITableViewDataSource {
         _ = shortDaysOfWeek[indexPath.row]
 
         cell.selectionStyle = .none
-        cell.configure(title: day.rawValue)
+        cell.configure(title: day.localizedString())
         cell.switchControl.isOn = selectedDays.contains(day)
         cell.switchControl.tag = indexPath.row
 

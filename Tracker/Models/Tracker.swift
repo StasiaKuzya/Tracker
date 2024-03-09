@@ -16,8 +16,9 @@ struct Tracker {
     let trackerSchedule: TrackerSchedule
     let category: String
     let isDone: Bool
+    var isPinned: Bool
     
-    init(trackerId: UUID, trackerName: String, trackerColor: UIColor, trackerEmoji: String, trackerSchedule: TrackerSchedule, category: String, isDone: Bool) {
+    init(trackerId: UUID, trackerName: String, trackerColor: UIColor, trackerEmoji: String, trackerSchedule: TrackerSchedule, category: String, isDone: Bool, isPinned: Bool) {
         self.trackerId = trackerId
         self.trackerName = trackerName
         self.trackerColor = trackerColor
@@ -25,6 +26,7 @@ struct Tracker {
         self.trackerSchedule = trackerSchedule
         self.category = category
         self.isDone = isDone
+        self.isPinned = isPinned
     }
 }
 
@@ -79,5 +81,15 @@ extension WeekDay {
             throw NSError(domain: "Invalid WeekDay raw value", code: 0, userInfo: nil)
         }
         return day
+    }
+    
+    func localizedString() -> String {
+        return NSLocalizedString(self.rawValue, comment: "")
+    }
+    
+    func localizedShortString() -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale.current
+        return formatter.shortWeekdaySymbols[numberDay - 1]
     }
 }

@@ -20,10 +20,17 @@ final class NewHabitCreationViewController: UIViewController {
     weak var delegate: TrackerDataDelegate?
     private let categoryStore = TrackerCategoryStore()
     private var selectedIndexes: [Int: Int] = [:]
+    private var lastSelectedIndexPaths: [Int: IndexPath] = [:]
     private var selectedEmoji: String?
     private var selectedColor: UIColor?
     
-    private var words: [(title: String, subtitle: String?)] = [("Категория", nil), ("Расписание", nil)]
+    private var words: [(title: String, subtitle: String?)] = [
+        (NSLocalizedString("categoryTable.title",
+                            comment: "Text displayed on categoryTable"),
+         nil),
+        (NSLocalizedString("scheduleTable.title",
+                           comment: "Text displayed on scheduleTable"),
+         nil)]
     
     private let maxLength = 38
     
@@ -68,7 +75,8 @@ final class NewHabitCreationViewController: UIViewController {
     
     private let textField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
+        textField.placeholder = NSLocalizedString("nameTrackerTextField.title",
+                                                  comment: "Text displayed on nameTrackerTextFieldTitle")
         textField.textColor = .designGray
         textField.backgroundColor = .designBackground
         textField.font = UIFont.systemFont(ofSize: 17)
@@ -88,6 +96,7 @@ final class NewHabitCreationViewController: UIViewController {
         tableView.layer.cornerRadius = 16
         tableView.separatorStyle = .singleLine
         tableView.layer.masksToBounds = true
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
     
@@ -113,9 +122,15 @@ final class NewHabitCreationViewController: UIViewController {
         return stackView
     }()
     
+    private let cancelButtonTitle = NSLocalizedString("cancelButton.title",
+                              comment: "Text displayed on cancelButtonTitle")
+    
+    private let creationButtonTitle = NSLocalizedString("creationButton.title",
+                              comment: "Text displayed on creationButtonTitle")
+    
     private lazy var cancelButton: UIButton = {
         let cancelButton = UIButton(type: .system)
-        cancelButton.setTitle("Отменить", for: .normal)
+        cancelButton.setTitle(cancelButtonTitle, for: .normal)
         
         cancelButton.titleLabel?.tintColor = .designRed
         cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
@@ -133,7 +148,7 @@ final class NewHabitCreationViewController: UIViewController {
     
     private lazy var creationButton: UIButton = {
         let creationButton = UIButton(type: .system)
-        creationButton.setTitle("Создать", for: .normal)
+        creationButton.setTitle(creationButtonTitle, for: .normal)
         
         creationButton.titleLabel?.tintColor = .designWhite
         creationButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
@@ -162,7 +177,7 @@ final class NewHabitCreationViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .designWhite
         
         setupViews()
         tableView.reloadData()
@@ -170,17 +185,24 @@ final class NewHabitCreationViewController: UIViewController {
         didSelectDays([])
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        addLowerBorder(to: tableView)
+    }
+
     // MARK: - Private Methods
+    
+    private func addLowerBorder(to view: UIView) {
+        let borderLowerView = UIView(frame: CGRect(x: 0, y: view.frame.height - 1, width: view.frame.size.width, height: 1.0))
+        borderLowerView.backgroundColor = .designWhite
+        view.addSubview(borderLowerView)
+    }
     
     private func setupViews() {
         view.addSubview(stackView)
         view.addSubview(collectionView)
         view.addSubview(stackViewH)
         
-        tableView.layer.borderWidth = 1
-        tableView.layer.borderColor = view.backgroundColor?.cgColor
-        
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             stackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
@@ -263,7 +285,8 @@ final class NewHabitCreationViewController: UIViewController {
                 trackerSchedule: TrackerSchedule(
                     trackerScheduleDaysOfWeek: selectedDays),
                 category: selectedCategoryString,
-                isDone: false
+                isDone: false,
+                isPinned: false
             )
             
             delegate?.didCreateTracker(tracker)
@@ -390,10 +413,11 @@ extension NewHabitCreationViewController: CategorySelectionDelegate {
 extension NewHabitCreationViewController: ScheduleSelectionDelegate {
     func didSelectDays(_ days: [WeekDay]) {
         selectedDays = days
-        let shortDayNames = days.map { $0.shortName }
+        let shortDayNames = days.map { $0.localizedShortString() }
         
         if days.count == 7 {
-            words[1].subtitle = "Каждый день"
+            words[1].subtitle = NSLocalizedString("scheduleEveryDay.title",
+                                                  comment: "Text displayed on scheduleEveryDayTitle")
         } else {
             words[1].subtitle = shortDayNames.joined(separator: ", ")
         }
@@ -443,6 +467,24 @@ extension NewHabitCreationViewController: UICollectionViewDataSource {
             }
         }
         
+        // Восстановление состояния выделения
+        if let selectedRow = selectedIndexes[indexPath.section], selectedRow == indexPath.row {
+            collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+        }
+        
+        // Пометка последней выбранной ячейки в секции
+        if let lastSelectedIndexPath = lastSelectedIndexPaths[indexPath.section], lastSelectedIndexPath == indexPath {
+            if indexPath.section == 0 {
+                selectedEmoji = emojies[indexPath.row]
+                cell.configureColor(.designLightGray)
+            } else {
+                selectedColor = colors[indexPath.row]
+                cell.pickConfiguredColor(selectedColor ?? .designBackground)
+            }
+        } else {
+            cell.backgroundColor = .clear
+        }
+        
         // Возвратить ячейку
         return cell
     }
@@ -460,8 +502,10 @@ extension NewHabitCreationViewController: UICollectionViewDataSource {
         
         let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as! SupplementaryColorEmojiView
         if collectionView == self.collectionView {
+            let colorsHeader = NSLocalizedString("colorsHeaderCV.title",
+                                  comment: "Text displayed on colorsHeader")
             if kind == UICollectionView.elementKindSectionHeader {
-                view.titleLabel.text = indexPath.section == 0 ? "Emoji" : "Цвета"
+                view.titleLabel.text = indexPath.section == 0 ? "Emoji" : colorsHeader
             }
         }
         
@@ -537,6 +581,7 @@ extension NewHabitCreationViewController: UICollectionViewDelegate {
         
         // Обновление словаря с выбранным индексом в данной секции
         selectedIndexes[indexPath.section] = indexPath.row
+        lastSelectedIndexPaths[indexPath.section] = indexPath
         
         if indexPath.section == 0 {
             selectedEmoji = emojies[indexPath.row]
